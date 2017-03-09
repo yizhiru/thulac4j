@@ -1,51 +1,57 @@
 package io.github.yizhiru.thulac4j;
 
 import io.github.yizhiru.thulac4j.base.CwsModel;
+import io.github.yizhiru.thulac4j.base.NGramFeature;
+import io.github.yizhiru.thulac4j.base.POCS;
 import io.github.yizhiru.thulac4j.base.Util;
-import io.github.yizhiru.thulac4j.process.Flatter;
+import io.github.yizhiru.thulac4j.process.Cementer;
+import io.github.yizhiru.thulac4j.process.Decoder;
+import io.github.yizhiru.thulac4j.process.Ruler;
 
 import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author jyzheng
  */
-public class Segmenter extends AbstractSegger {
+public abstract class Segmenter<T> {
+  protected CwsModel model;
+  protected int[][] labelTrans;
+  protected Cementer ns;
+  protected Cementer idiom;
+  protected Cementer uw;
 
-  public Segmenter(String modelPath) throws FileNotFoundException {
-    model = CwsModel.loadModel(modelPath);
-    setUp();
+
+
+  protected void setUp() {
+    labelTrans = Util.labelPreTransitions(model.labelValues);
+    ns = new Cementer(this.getClass().getResourceAsStream(Util.nsDat), "ns");
+    idiom = new Cementer(this.getClass().getResourceAsStream(Util.idiomDat), "i");
   }
 
-  public Segmenter(InputStream in) {
-    model = CwsModel.loadModel(in);
-    setUp();
+
+  /**
+   * 处理序列标注得到分词结果
+   *
+   * @param cleaned 清洗后的字符串
+   * @return 词与词性的数组
+   */
+  abstract List<T> getResult(String cleaned, int[] labels);
+
+
+  public List<T> segment(String sentence) {
+    if (sentence.length() == 0) return getResult(sentence, null);
+    Ruler ruler = new Ruler(sentence.toCharArray());
+    String cleaned = ruler.rulePoc();
+    NGramFeature nGram = new NGramFeature(model.featureDat);
+    int[][] values = nGram.putValues(model, cleaned.toCharArray());
+    int[] labels = Decoder.viterbi(model, cleaned.length(), ruler.pocss, values, labelTrans);
+    return getResult(cleaned, labels);
   }
 
 
-  @Override
-  public List<String> segment(String sentence) {
-    List<String> result = new ArrayList<>();
-    int[] labels = sequenceLabel(sentence);
-    if (labels == null) return result;
-    int len = sentence.length();
-    char poc;
-    String word, label;
-    for (int i = 0, offset = 0; i < len; i++) {
-      label = model.labelValues[labels[i]];
-      poc = label.charAt(0);
-      if (poc == Util.POC_E || poc == Util.POC_S) {
-        word = sentence.substring(offset, i + 1);
-        result.add(word);
-        offset = i + 1;
-      }
-    }
-    ns.cement(result);
-    idiom.cement(result);
-    if (uw != null) uw.cement(result);
-    Flatter.flat(result);
-    return result;
+  public void setUserWordsPath(String path) throws FileNotFoundException {
+    uw = new Cementer(path, "uw");
   }
 }

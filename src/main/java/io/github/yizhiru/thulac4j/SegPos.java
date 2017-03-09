@@ -3,7 +3,6 @@ package io.github.yizhiru.thulac4j;
 import io.github.yizhiru.thulac4j.base.CwsModel;
 import io.github.yizhiru.thulac4j.base.SegItem;
 import io.github.yizhiru.thulac4j.base.Util;
-import io.github.yizhiru.thulac4j.process.Flatter;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -13,23 +12,22 @@ import java.util.List;
 /**
  * @author jyzheng
  */
-public class SegPOSer extends AbstractSegger {
+public class SegPos extends Segmenter {
 
-  public SegPOSer(String modelPath) throws FileNotFoundException {
+  public SegPos(String modelPath) throws FileNotFoundException {
     model = CwsModel.loadModel(modelPath);
     setUp();
   }
 
-  public SegPOSer(InputStream in) {
+  public SegPos(InputStream in) {
     model = CwsModel.loadModel(in);
     setUp();
   }
 
 
   @Override
-  public List<SegItem> segment(String sentence) {
+  public List<SegItem> getResult(String sentence, int[] labels) {
     List<SegItem> result = new ArrayList<>();
-    int[] labels = sequenceLabel(sentence);
     if (labels == null) return result;
     int len = sentence.length();
     char poc;
@@ -47,7 +45,6 @@ public class SegPOSer extends AbstractSegger {
     ns.cementPos(result);
     idiom.cementPos(result);
     if (uw != null) uw.cementPos(result);
-    Flatter.flatPos(result);
     return result;
   }
 }

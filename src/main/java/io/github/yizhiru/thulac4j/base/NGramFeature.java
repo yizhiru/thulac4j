@@ -7,8 +7,8 @@ import io.github.yizhiru.thulac4j.dat.Dat;
  * @author jyzheng
  */
 public class NGramFeature {
-  public static final char BOUNDARY = '#'; // 超越边界的统一字符
-  public static final char SPACE = ' '; // feature的一部分
+  private static final char BOUNDARY = '#'; // 超越边界的统一字符
+  private static final char SPACE = ' '; // feature的一部分
 
   private Dat featDat;
 
@@ -53,9 +53,9 @@ public class NGramFeature {
   public int[][] putValues(CwsModel model, char[] sentence) {
     int len = sentence.length;
     int[][] values = new int[len][];
-    String str = String.valueOf(BOUNDARY) + BOUNDARY + String.valueOf(sentence) +
-            BOUNDARY + BOUNDARY;
-    char[] chs = str.toCharArray();
+    char[] chs = new char[len + 4];
+    System.arraycopy(sentence, 0, chs, 2, len);
+    chs[0] = chs[1] = chs[chs.length - 2] = chs[chs.length - 1] = BOUNDARY;
     for (int i = 0; i < len; i++) {
       values[i] = putValue(model, chs[i], chs[i + 1], chs[i + 2], chs[i + 3], chs[i + 4]);
     }
@@ -68,23 +68,21 @@ public class NGramFeature {
                          char right2) {
     int[] value = new int[model.labelSize];
     int base;
-    for (int i = 0; i < model.labelSize; i++) {
-      if ((base = findUniFeat(mid, '1')) != -1)
-        value[i] += model.flWeights[base][i];
-      if ((base = findUniFeat(left1, '2')) != -1)
-        value[i] += model.flWeights[base][i];
-      if ((base = findUniFeat(right1, '3')) != -1)
-        value[i] += model.flWeights[base][i];
-      if ((base = findBiFeat(left1, mid, '1')) != -1)
-        value[i] += model.flWeights[base][i];
-      if ((base = findBiFeat(mid, right1, '2')) != -1)
-        value[i] += model.flWeights[base][i];
-      if ((base = findBiFeat(left2, left1, '3')) != -1)
-        value[i] += model.flWeights[base][i];
-      if ((base = findBiFeat(right1, right2, '4')) != -1)
-        value[i] += model.flWeights[base][i];
-    }
+    if ((base = findUniFeat(mid, '1')) != -1) addValue(value, base, model);
+    if ((base = findUniFeat(left1, '2')) != -1) addValue(value, base, model);
+    if ((base = findUniFeat(right1, '3')) != -1) addValue(value, base, model);
+    if ((base = findBiFeat(left1, mid, '1')) != -1) addValue(value, base, model);
+    if ((base = findBiFeat(mid, right1, '2')) != -1) addValue(value, base, model);
+    if ((base = findBiFeat(left2, left1, '3')) != -1) addValue(value, base, model);
+    if ((base = findBiFeat(right1, right2, '4')) != -1) addValue(value, base, model);
+
     return value;
+  }
+
+  private void addValue(int[] value, int base, CwsModel model) {
+    for (int i = 0; i < model.labelSize; i++) {
+      value[i] += model.flWeights[base][i];
+    }
   }
 
   private int process(char ch) {

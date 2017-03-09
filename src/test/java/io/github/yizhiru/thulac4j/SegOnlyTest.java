@@ -1,17 +1,19 @@
 package io.github.yizhiru.thulac4j;
 
 
-import org.junit.Test;
-
 import java.util.List;
 
 /**
  * @author jyzheng
  */
-public class SegmentTest {
+public class SegOnlyTest {
 
   static String[] sentences = new String[]{
-          "倒模，替身算什么？钟汉良、ab《孤芳不自赏》抠图来充数", "奥迪CEO违规遭批 大众表示不会解雇",
+          "4个月赚了20％多",
+          "仅1只，为0.9923元",
+          "Just one space, or all such spaces?",
+          "倒模，替身算什么？钟汉良、ab《孤芳不自赏》抠图来充数",
+          "奥迪CEO违规遭批 大众表示不会解雇",
           "找小姐", "找美女", "找小妹", "学生妹", "职业狐狸精", "男公关", "上门", "抽獎",
           "好声音", "好聲音", "夢之声", "夢之聲", "訂票", "改簽", "熱线", "熱線", "热線", "電话",
           "電話", "醫院", "代刷", "撲剋牌", "137-1234-1234",
@@ -60,10 +62,11 @@ public class SegmentTest {
           "C++和c#是什么关系？11+122=133，是吗？PI=3.14159",
           "你认识那个和主席握手的的哥吗？他开一辆黑色的士。", "枪杆子中出政权", "鲜芋仙 3"};
 
-  static String[] bugs = new String[]{
+  static String[] busSentences = new String[]{
           "UTF-8",
           "iphone5",
           "鲜芋仙 3",
+          "两块五一套，三块八一斤，四块七一本，五块六一条",
           "RT @laoshipukong : 27日，",
           "AT&T是一件不错的公司，给你发offer了吗？",
           "干脆就把那部蒙人的闲法给废了拉倒！RT @laoshipukong : 27日，全国人大常委会第三次审议侵权" +
@@ -72,13 +75,13 @@ public class SegmentTest {
 
 
   public static void main(String[] args) throws Exception {
-    Segmenter segmenter = new Segmenter("models/seg_only.bin");
+    Segmenter segmenter = new SegOnly("models/seg_only.bin");
     for (String sentence : sentences) {
       List<String> result = segmenter.segment(sentence);
       System.out.println(result);
     }
 
-    for (String sentence : bugs) {
+    for (String sentence : busSentences) {
       List<String> result = segmenter.segment(sentence);
       System.out.println(result);
     }

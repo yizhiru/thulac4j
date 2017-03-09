@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class ThulacModel {
   // weight model: cws_model.bin  model_c_model.bin
-  public int labelSize; //size of the labels
+  public int labelSize; //size of the labelValues
   public int featureSize; //size of the features
   public int[] llWeights; // weights of (label, label)
   public int[] flWeights; // weights of (featureDat, label)
@@ -25,7 +25,7 @@ public class ThulacModel {
   public int[] featDat;
 
   // label: cws_label.txt  model_c_label.txt
-  public String[] labels;
+  public String[] labelValues;
 
   public ThulacModel(String modelPath, String featPath, String labelPath) throws IOException {
     // load weights model
@@ -58,11 +58,11 @@ public class ThulacModel {
       labelList.add(line);
     }
     reader.close();
-    labels = new String[labelList.size()];
-    labelList.toArray(labels);
+    labelValues = new String[labelList.size()];
+    labelList.toArray(labelValues);
   }
 
-  public void convert(String path) throws FileNotFoundException {
+  public void serialize(String path) throws FileNotFoundException {
     CwsModel cws = new CwsModel();
     // convert model
     cws.featureSize = featureSize;
@@ -89,26 +89,39 @@ public class ThulacModel {
     }
     cws.featureDat = new Dat(dat);
 
-    // convert labels
-    cws.labelValues = labels;
-    cws.allowTabular = new int[7][];
+    // convert labelValues
+    cws.labelValues = labelValues;
+    cws.allowTabular = new int[12][];
     List<List<Integer>> pocTags = pocTag();
+    for (int i = 0; i < labelValues.length; i++) {
+      if (labelValues[i].equals("3") || labelValues[i].equals("3w")) // punctuation
+        cws.allowTabular[0] = new int[]{i};
+      if (labelValues[i].equals("0") || labelValues[i].equals("0m"))  // begin of numeral
+        cws.allowTabular[1] = new int[]{i};
+      if (labelValues[i].equals("1") || labelValues[i].equals("1m"))  // middle of numeral
+        cws.allowTabular[2] = new int[]{i};
+      if (labelValues[i].equals("2") || labelValues[i].equals("2m"))  // end of numeral
+        cws.allowTabular[3] = new int[]{i};
+      if (labelValues[i].equals("3") || labelValues[i].equals("3m"))  // single of numeral
+        cws.allowTabular[4] = new int[]{i};
+    }
     int[] indices = {1, 2, 4, 8, 9, 12, 15};
     for (int i = 0; i < 7; i++) {
-      cws.allowTabular[i] = toArray(pocTags, indices[i]);
+      cws.allowTabular[i + 5] = toArray(pocTags, indices[i]);
     }
 
     // serialization
     Util.serialize(cws, path);
   }
 
-  private List<List<Integer>> pocTag() {
+  // get the pocTags
+  public List<List<Integer>> pocTag() {
     List<List<Integer>> pocTags = new ArrayList<>();
     for (int i = 0; i < 16; i++) {
       pocTags.add(new ArrayList<>());
     }
-    for (int i = 0; i < labels.length; i++) {
-      int segIndex = labels[i].charAt(0) - '0';
+    for (int i = 0; i < labelValues.length; i++) {
+      int segIndex = labelValues[i].charAt(0) - '0';
       for (int j = 0; j < 16; j++) {
         if (((1 << segIndex) & j) != 0)
           pocTags.get(j).add(i);
@@ -117,6 +130,7 @@ public class ThulacModel {
     return pocTags;
   }
 
+  // get int[] array from pocTags[i]
   private int[] toArray(List<List<Integer>> pocTags, int index) {
     List<Integer> list = pocTags.get(index);
     int[] arr = new int[list.size()];
@@ -126,25 +140,4 @@ public class ThulacModel {
     return arr;
   }
 
-
-  public static void main(String[] args) throws IOException {
-//    ThulacModel thulac = new ThulacModel("D:\\IdeaProjects\\scala-test\\models/cws_model.bin",
-//            "D:\\IdeaProjects\\scala-test\\models/cws_dat.bin",
-//            "D:\\IdeaProjects\\scala-test\\models/cws_label.txt");
-    ThulacModel thulac = new ThulacModel("D:\\IdeaProjects\\scala-test\\models/model_c_model.bin",
-            "D:\\IdeaProjects\\scala-test\\models/model_c_dat.bin",
-            "D:\\IdeaProjects\\scala-test\\models/model_c_label.txt");
-
-    System.out.println(thulac.featureSize);
-    System.out.println(thulac.labelSize);
-    System.out.println(thulac.llWeights[0]);
-    System.out.println(thulac.flWeights[0]);
-    System.out.println(thulac.datSize);
-    System.out.println(thulac.featDat[5]);
-    for (String s : thulac.labels) {
-      System.out.println(s);
-    }
-    System.out.println(thulac.pocTag());
-    thulac.convert("models/seg_pos.bin");
-  }
 }

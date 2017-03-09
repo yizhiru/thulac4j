@@ -30,12 +30,11 @@ public class Util {
    *
    * @return List(前向label)的数组
    */
-  public static List<Integer>[] labelPreTransitions(String[] labelValues) {
+  public static int[][] labelPreTransitions(String[] labelValues) {
     int labelSize = labelValues.length;
-    @SuppressWarnings("unchecked")
-    List<Integer>[] labelTrans = new LinkedList[labelSize];
+    List<List<Integer>> labelTrans = new LinkedList<>();
     for (int i = 0; i < labelSize; i++) {
-      labelTrans[i] = new LinkedList<Integer>();
+      labelTrans.add(new LinkedList<>());
     }
     for (int i = 0; i < labelSize; i++) {
       for (int j = 0; j < labelSize; j++) {
@@ -47,14 +46,21 @@ public class Util {
                   (iPoc == POC_M && (jPoc == POC_M || jPoc == POC_E)) ||
                   (iPoc == POC_E && (jPoc == POC_B || jPoc == POC_S)) ||
                   (iPoc == POC_S && (jPoc == POC_B || jPoc == POC_S))) {
-            labelTrans[j].add(i);
+            labelTrans.get(j).add(i);
           }
         } else if ((iPoc == POC_E || iPoc == POC_S) && (jPoc == POC_B || jPoc == POC_S)) {
-          labelTrans[j].add(i);
+          labelTrans.get(j).add(i);
         }
       }
     }
-    return labelTrans;
+    int[][] preTrans = new int[labelSize][];
+    for (int i = 0; i < labelSize; i++) {
+      preTrans[i] = new int[labelTrans.get(i).size()];
+      for (int j = 0; j < labelTrans.get(i).size(); j++) {
+        preTrans[i][j] = labelTrans.get(i).get(j);
+      }
+    }
+    return preTrans;
   }
 
   public static void serialize(Object obj, String path) throws FileNotFoundException {

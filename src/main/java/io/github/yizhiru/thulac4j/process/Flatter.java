@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * @author jyzheng
+ * 用于拆词, 因在工程项目中可不用到, 故未分词中未使用
  */
 public class Flatter {
 
