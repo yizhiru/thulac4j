@@ -1,15 +1,17 @@
 package io.github.yizhiru.thulac4j.process;
 
-import io.github.yizhiru.thulac4j.base.ALLowLabels;
 import io.github.yizhiru.thulac4j.base.CwsModel;
+import io.github.yizhiru.thulac4j.base.POCS;
 
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * @author jyzheng
  */
 public class Decoder {
+
+  private static final int NULL = -5;
 
   private static class Alpha {
     public int score; // 打分
@@ -19,60 +21,71 @@ public class Decoder {
       this.score = score;
       this.preLabel = preLabel;
     }
+
+    public Alpha() {
+      score = 0;
+      preLabel = NULL;
+    }
   }
 
   /**
    * Viterbi算法解码
    *
    * @param model         CwsModel训练模型
-   * @param sentence      待分词句子
-   * @param allows        每个char允许的label
+   * @param len           待分词句子
+   * @param pocses        每个char允许的POCS
    * @param values        特征模板对应的权值加权之和F(y_{t+1}=y,C)
    * @param labelPreTrans label的前向label
-   * @return
+   * @return 最优路径对应的labels
    */
-  public static int[] viterbi(CwsModel model, char[] sentence, ALLowLabels[] allows,
-                              int[][] values, List<Integer>[] labelPreTrans) {
-    int len = sentence.length;
-    int[] bestLabels = new int[len]; // 最优路径对应的label
-    Alpha alpha = new Alpha(0, -1);
-    int maxScore = 0;
+  public static int[] viterbi(CwsModel model, int len, List<POCS> pocses,
+                              int[][] values, int[][] labelPreTrans) {
+    int[] bestPath = new int[len]; // 最优路径对应的label
+    int lSize = model.labelSize, score, bestScore = Integer.MIN_VALUE, bestLabel = 2;
+    int[] preLabels, labels;
+    Alpha alpha;
     // 记录在位置i时类别为y的最优路径
-    // HashMap: label -> (score, preLabel)]
-    @SuppressWarnings("unchecked")
-    HashMap<Integer, Alpha>[] tabular = new HashMap[len];
-    //初始化
-    tabular[0] = new HashMap<>(allows[0].labels.length);
-    for (int lab : allows[0].labels) {
-      tabular[0].put(lab, new Alpha(values[0][lab], -1));
+    // [current index][current Label]: Alpha(score, preLabel)
+    Alpha[][] tabular = new Alpha[len][];
+    for (int i = 0; i < len; i++) {
+      tabular[i] = new Alpha[lSize];
+      for (int j = 0; j < lSize; j++)
+        tabular[i][j] = new Alpha();
     }
     // DP求解
-    for (int i = 1; i < len; i++) {
-      tabular[i] = new HashMap<>(allows[i].labels.length);
-      for (int lab : allows[i].labels) {
-        List<Integer> preLabels = labelPreTrans[lab];
-        for (int pre : preLabels) {
-          maxScore = tabular[i - 1].getOrDefault(pre, alpha).score +
-                  model.llWeights[pre][lab] + values[i][lab];
-          if (!tabular[i].containsKey(lab) || maxScore > tabular[i].get(lab).score) {
-            tabular[i].put(lab, new Alpha(maxScore, pre));
+    for (int i = 0; i < len; i++) {
+      labels = model.allowTabular[pocses.get(i).ordinal()];
+      for (int label : labels) {
+        alpha = tabular[i][label];
+        if (i == 0) {
+          alpha.preLabel = -1;
+        } else {
+          preLabels = labelPreTrans[label];
+          for (int pre : preLabels) {
+            if (tabular[i - 1][pre].preLabel == NULL) continue;
+            score = tabular[i - 1][pre].score + model.llWeights[pre][label];
+            if (alpha.preLabel == NULL || score > alpha.score) {
+              alpha.score = score;
+              alpha.preLabel = pre;
+            }
           }
+        }
+        alpha.score += values[i][label];
+        if (i == len - 1 && bestScore < alpha.score) {
+          bestScore = alpha.score;
+          bestLabel = label;
         }
       }
     }
-    // 找到尾节点的最优label
-    for (int lab : allows[len - 1].labels) {
-      if (tabular[len - 1].get(lab).score > alpha.score) {
-        alpha = tabular[len - 1].get(lab);
-        bestLabels[len - 1] = lab;
-      }
-    }
+    // 尾节点的最优label
+    alpha = tabular[len - 1][bestLabel];
+    bestPath[len - 1] = bestLabel;
     // 回溯最优路径，保留label到数组
-    for (int i = len - 2, j = len - 2; i >= 0; i--, j--) {
-      bestLabels[i] = alpha.preLabel;
-      alpha = tabular[j].get(alpha.preLabel);
+    for (int i = len - 2; i >= 0; i--) {
+      bestPath[i] = alpha.preLabel;
+      alpha = tabular[i][alpha.preLabel];
     }
-    return bestLabels;
+    return bestPath;
   }
 
 }

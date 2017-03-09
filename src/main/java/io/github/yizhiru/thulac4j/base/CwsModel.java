@@ -21,7 +21,7 @@ public class CwsModel implements Serializable {
   public int[][] flWeights; // weights of (feature, label)
   public Dat featureDat; // feature DAT
   public String[] labelValues;
-  public int[][] allowTabular;
+  public int[][] allowTabular; // map to enum POCS
 
   public static CwsModel loadModel(String path) throws FileNotFoundException {
     FileInputStream fis = new FileInputStream(path);
