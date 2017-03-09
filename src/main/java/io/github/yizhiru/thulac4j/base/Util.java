@@ -20,8 +20,8 @@ public class Util {
   public static final Character POC_S = '3'; // single
 
   public static final String base = "/models/";
-  public static final String nsDat = base + "ns_dat.bin";
-  public static final String idiomDat = base + "idiom_dat.bin";
+  public static final String nsDat = "models/ns_dat.bin";
+  public static final String idiomDat = "models/idiom_dat.bin";
   public static final String t2s = base + "t2s.bin";
 
 

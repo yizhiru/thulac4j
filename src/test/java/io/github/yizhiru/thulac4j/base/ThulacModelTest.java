@@ -9,13 +9,13 @@ import java.util.List;
 public class ThulacModelTest {
 
   public static void main(String[] args) throws IOException {
-    ThulacModel thulac = new ThulacModel("train/cws_model.bin",
-            "train/cws_dat.bin",
-            "train/cws_label.txt");
+//    ThulacModel thulac = new ThulacModel("train/cws_model.bin",
+//            "train/cws_dat.bin",
+//            "train/cws_label.txt");
 
-//    ThulacModel thulac = new ThulacModel("train/model_c_model.bin",
-//            "train/model_c_dat.bin",
-//            "train/model_c_label.txt");
+    ThulacModel thulac = new ThulacModel("train/model_c_model.bin",
+            "train/model_c_dat.bin",
+            "train/model_c_label.txt");
 
     System.out.println(thulac.featureSize);
     System.out.println(thulac.labelSize);
@@ -23,7 +23,7 @@ public class ThulacModelTest {
     System.out.println(thulac.flWeights[0]);
     System.out.println(thulac.datSize);
     System.out.println(thulac.featDat[5]);
-    thulac.serialize("models/seg_only.bin");
+    thulac.serialize("models/seg_pos.bin");
 
 //    String[] labelValues = thulac.labelValues;
 //    List<List<Integer>> pocTags = thulac.pocTag();

@@ -13,7 +13,7 @@ import java.io.FileNotFoundException;
 public class DatTest {
   @Test
   public void nsMatch() throws FileNotFoundException {
-    Dat dat = Dat.loadDat(this.getClass().getResourceAsStream(Util.nsDat));
+    Dat dat = Dat.loadDat(Util.nsDat);
     System.out.println(dat.entries.size());
     Assert.assertTrue(dat.isPrefixMatched("黑龙"));
     Assert.assertTrue(dat.isWordMatched("黑龙江"));

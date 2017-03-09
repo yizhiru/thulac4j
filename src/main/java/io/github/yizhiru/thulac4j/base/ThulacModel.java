@@ -1,6 +1,7 @@
 package io.github.yizhiru.thulac4j.base;
 
 import io.github.yizhiru.thulac4j.dat.Dat;
+import io.github.yizhiru.thulac4j.process.Cementer;
 
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -109,6 +110,9 @@ public class ThulacModel {
     for (int i = 0; i < 7; i++) {
       cws.allowTabular[i + 5] = toArray(pocTags, indices[i]);
     }
+
+    cws.ns = new Cementer(Util.nsDat, "ns");
+    cws.idiom = new Cementer(Util.idiomDat, "i");
 
     // serialization
     Util.serialize(cws, path);
