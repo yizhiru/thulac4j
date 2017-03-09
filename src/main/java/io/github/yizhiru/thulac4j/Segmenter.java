@@ -18,16 +18,12 @@ import java.util.List;
 public abstract class Segmenter<T> {
   protected CwsModel model;
   protected int[][] labelTrans;
-  protected Cementer ns;
-  protected Cementer idiom;
   protected Cementer uw;
 
 
 
-  protected void setUp() {
+  protected void setPreTrans() {
     labelTrans = Util.labelPreTransitions(model.labelValues);
-    ns = new Cementer(this.getClass().getResourceAsStream(Util.nsDat), "ns");
-    idiom = new Cementer(this.getClass().getResourceAsStream(Util.idiomDat), "i");
   }
 
 

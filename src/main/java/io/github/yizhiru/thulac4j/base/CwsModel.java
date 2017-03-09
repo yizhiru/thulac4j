@@ -3,6 +3,7 @@ package io.github.yizhiru.thulac4j.base;
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.Input;
 import io.github.yizhiru.thulac4j.dat.Dat;
+import io.github.yizhiru.thulac4j.process.Cementer;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -22,6 +23,9 @@ public class CwsModel implements Serializable {
   public Dat featureDat; // feature DAT
   public String[] labelValues;
   public int[][] allowTabular; // map to enum POCS
+
+  public Cementer ns;
+  public Cementer idiom;
 
   public static CwsModel loadModel(String path) throws FileNotFoundException {
     FileInputStream fis = new FileInputStream(path);

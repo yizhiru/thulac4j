@@ -5,12 +5,13 @@ import io.github.yizhiru.thulac4j.dat.Dat;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.util.List;
 
 /**
  * @author jyzheng
  */
-public class Cementer {
+public class Cementer implements Serializable {
   private Dat dat;
   private String pos; // 词性
 
@@ -22,6 +23,9 @@ public class Cementer {
   public Cementer(InputStream in, String pos) {
     dat = Dat.loadDat(in);
     this.pos = pos;
+  }
+
+  public Cementer() {
   }
 
   /**

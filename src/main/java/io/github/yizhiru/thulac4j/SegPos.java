@@ -16,12 +16,12 @@ public class SegPos extends Segmenter {
 
   public SegPos(String modelPath) throws FileNotFoundException {
     model = CwsModel.loadModel(modelPath);
-    setUp();
+    setPreTrans();
   }
 
   public SegPos(InputStream in) {
     model = CwsModel.loadModel(in);
-    setUp();
+    setPreTrans();
   }
 
 
@@ -42,8 +42,8 @@ public class SegPos extends Segmenter {
         offset = i + 1;
       }
     }
-    ns.cementPos(result);
-    idiom.cementPos(result);
+    model.ns.cementPos(result);
+    model.idiom.cementPos(result);
     if (uw != null) uw.cementPos(result);
     return result;
   }

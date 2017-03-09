@@ -18,7 +18,7 @@ public class CementerTest {
 
   @Test
   public void cementNs() throws FileNotFoundException {
-    Cementer cementer = new Cementer(this.getClass().getResourceAsStream(Util.nsDat), "ns");
+    Cementer cementer = new Cementer(Util.nsDat, "ns");
     List<String> arr = new ArrayList<>(Arrays.asList("黑", "龙", "江"));
     cementer.cement(arr);
     assertArrayEquals(arr.toArray(), new String[]{"黑龙江"});
@@ -26,7 +26,7 @@ public class CementerTest {
 
   @Test
   public void cementNsPos() throws FileNotFoundException {
-    Cementer cementer = new Cementer(this.getClass().getResourceAsStream(Util.nsDat), "ns");
+    Cementer cementer = new Cementer(Util.nsDat, "ns");
     List<SegItem> arr = new ArrayList<>(Arrays.asList(
             new SegItem("黑", null),
             new SegItem("龙", "n"),

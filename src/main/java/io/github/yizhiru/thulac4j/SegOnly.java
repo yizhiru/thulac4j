@@ -15,12 +15,12 @@ public class SegOnly extends Segmenter {
 
   public SegOnly(String modelPath) throws FileNotFoundException {
     model = CwsModel.loadModel(modelPath);
-    setUp();
+    setPreTrans();
   }
 
   public SegOnly(InputStream in) {
     model = CwsModel.loadModel(in);
-    setUp();
+    setPreTrans();
   }
 
 
@@ -40,8 +40,8 @@ public class SegOnly extends Segmenter {
         offset = i + 1;
       }
     }
-    ns.cement(result);
-    idiom.cement(result);
+    model.ns.cement(result);
+    model.idiom.cement(result);
     if (uw != null) uw.cement(result);
     return result;
   }
