@@ -28,7 +28,7 @@ public class SegPos extends Segmenter {
   @Override
   public List<SegItem> getResult(String sentence, int[] labels) {
     List<SegItem> result = new ArrayList<>();
-    if (labels == null) return result;
+    if (labels == null || labels.length == 0) return result;
     int len = sentence.length();
     char poc;
     String word, label;

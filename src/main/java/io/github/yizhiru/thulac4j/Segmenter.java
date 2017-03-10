@@ -37,9 +37,10 @@ public abstract class Segmenter<T> {
 
 
   public List<T> segment(String sentence) {
-    if (sentence.length() == 0) return getResult(sentence, null);
+    if (sentence.length() == 0) return getResult(sentence, new int[0]);
     Ruler ruler = new Ruler(sentence.toCharArray());
     String cleaned = ruler.rulePoc();
+    if(cleaned.length() == 0) return getResult(cleaned, new int[0]);
     NGramFeature nGram = new NGramFeature(model.featureDat);
     int[][] values = nGram.putValues(model, cleaned.toCharArray());
     int[] labels = Decoder.viterbi(model, cleaned.length(), ruler.pocss, values, labelTrans);

@@ -15,7 +15,7 @@ thulac4j是[THULAC](http://thulac.thunlp.org/)的Java 8实现，相比于[THULAC
 <dependency>
   <groupId>io.github.yizhiru</groupId>
   <artifactId>thulac4j</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1</version>
 </dependency>
 ```
 
@@ -35,10 +35,10 @@ System.out.println(seg.segment(sentence));
 // SegPos mode
 SegPos pos = new SegPos("seg_pos.bin");
 System.out.println(pos.segment(sentence));
-//[滔滔/a, 的/u, 流水/n, ，/w, 向着/p, 波士顿湾/ns, 无声/v, 逝去/v]
+// [滔滔/a, 的/u, 流水/n, ，/w, 向着/p, 波士顿湾/ns, 无声/v, 逝去/v]
 ```
 
-更多使用说明请参看[Getting Started](https://github.com/yizhiru/thulac4j/wiki).
+模型数据较大，没有放在jar包与源码。更多使用说明及特性请参看[Getting Started](https://github.com/yizhiru/thulac4j/wiki).
 
 
 ## ToDo
