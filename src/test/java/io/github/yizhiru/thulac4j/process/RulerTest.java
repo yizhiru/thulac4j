@@ -1,6 +1,5 @@
 package io.github.yizhiru.thulac4j.process;
 
-import junit.framework.TestCase;
 import org.junit.Test;
 
 /**

@@ -12,11 +12,11 @@ public class Serialization {
 
   public static void main(String[] args) throws IOException {
     DatMaker maker = new DatMaker();
-    Dat dat = maker.make("dicts/ns.dict");
-    Util.serialize(dat, "models/ns_dat.bin");
-    DatMaker maker1 = new DatMaker();
-    dat = maker.make("dicts/idiom.dict");
-    Util.serialize(dat, "models/idiom_dat.bin");
+    Dat dat = maker.make("dicts/stop_words.dict");
+    Util.serialize(dat, "models/stop_dat.bin");
+//    DatMaker maker1 = new DatMaker();
+//    dat = maker.make("dicts/idiom.dict");
+//    Util.serialize(dat, "models/idiom_dat.bin");
   }
 
 }

@@ -23,6 +23,7 @@ public class Util {
   public static final String nsDat = "models/ns_dat.bin";
   public static final String idiomDat = "models/idiom_dat.bin";
   public static final String t2s = base + "t2s.bin";
+  public static final String stopDat = base + "stop_dat.bin";
 
 
   /**
