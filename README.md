@@ -1,10 +1,10 @@
 # thulac4j
 
-thulac4j是[THULAC](http://thulac.thunlp.org/)的Java 8实现，相比于[THULAC-Java](https://github.com/thunlp/THULAC-Java)，我们做了如下工作：
+thulac4j是[THULAC](http://thulac.thunlp.org/)的高效Java 8实现，具有分词速度快、准、强的特点；并且支持
 
-1. 规范化分词词典，并去掉一些无用词；
-2. 重写DAT（双数组Trie树）的构造算法，生成的DAT size减少了8%左右，从而节省了内存；
-3. 优化分词算法，提高了分词速率。
+- 自定义词典；
+- 繁体转简体；
+- 停用词过滤。
 
 
 ## 使用示例
@@ -15,7 +15,7 @@ thulac4j是[THULAC](http://thulac.thunlp.org/)的Java 8实现，相比于[THULAC
 <dependency>
   <groupId>io.github.yizhiru</groupId>
   <artifactId>thulac4j</artifactId>
-  <version>1.0.1</version>
+  <version>1.1.0</version>
 </dependency>
 ```
 
@@ -40,12 +40,6 @@ System.out.println(pos.segment(sentence));
 
 模型数据较大，没有放在jar包与源码。更多使用说明及特性请参看[Getting Started](https://github.com/yizhiru/thulac4j/wiki).
 
-
-## ToDo
-
-1. 优化分词词典；
-2. 增加自定义分词规则；
-3. 停用词过滤。
 
 最后感谢THUNLP实验室！没有你们的努力，便没有这么好用的THULAC，也就没有thulac4j。
 
