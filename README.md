@@ -1,10 +1,10 @@
 # thulac4j
 
-thulac4j是[THULAC](http://thulac.thunlp.org/)的高效Java 8实现，具有分词速度快、准、强的特点；并且支持
+thulac4j是[THULAC](http://thulac.thunlp.org/)的高效Java 8实现，具有分词速度快、准、强的特点；支持
 
-- 自定义词典；
-- 繁体转简体；
-- 停用词过滤。
+- 自定义词典
+- 繁体转简体
+- 停用词过滤
 
 
 ## 使用示例
@@ -38,7 +38,7 @@ System.out.println(pos.segment(sentence));
 // [滔滔/a, 的/u, 流水/n, ，/w, 向着/p, 波士顿湾/ns, 无声/v, 逝去/v]
 ```
 
-模型数据较大，没有放在jar包与源码。更多使用说明及特性请参看[Getting Started](https://github.com/yizhiru/thulac4j/wiki).
+模型数据较大，没有放在jar包与源码。训练模型下载及更多使用说明，请参看[Getting Started](https://github.com/yizhiru/thulac4j/wiki).
 
 
 最后感谢THUNLP实验室！没有你们的努力，便没有这么好用的THULAC，也就没有thulac4j。
