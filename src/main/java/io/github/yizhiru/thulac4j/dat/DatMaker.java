@@ -84,9 +84,10 @@ public class DatMaker extends Dat {
 
   /**
    * 给定前缀生成后一字符集合
+   *
    * @param lexicon 词典
-   * @param start 词典开始时的索引位置
-   * @param prefix 前缀
+   * @param start   词典开始时的索引位置
+   * @param prefix  前缀
    * @return 后一字符集合
    */
   private List<Integer> genChildren(List<String> lexicon, int start, String prefix) {
@@ -105,36 +106,38 @@ public class DatMaker extends Dat {
 
   /**
    * 构建DAT
+   *
    * @param lexicon 词典
    * @return 词典对应的DAT
    */
-  public Dat build(List<String> lexicon) {
+  public static Dat build(List<String> lexicon) {
+    DatMaker maker = new DatMaker();
     lexicon.sort(String::compareTo);
     String word, prefix;
     int preIndex;
     for (int i = 0; i < lexicon.size(); i++) {
       word = lexicon.get(i);
-      int matched = hasMatched(word);
+      int matched = maker.hasMatched(word);
       matched = matched < 0 ? word.length() : matched;
       for (int j = matched; j <= word.length(); j++) {
         prefix = word.substring(0, j);
-        preIndex = -hasMatched(prefix);
-        List<Integer> children = genChildren(lexicon, i, prefix);
-        insert(preIndex, children, j == word.length());
+        preIndex = -maker.hasMatched(prefix);
+        List<Integer> children = maker.genChildren(lexicon, i, prefix);
+        maker.insert(preIndex, children, j == word.length());
       }
-      matched = -hasMatched(word);
-      entries.get(entries.get(matched).base).base = i;
+      matched = -maker.hasMatched(word);
+      maker.entries.get(maker.entries.get(matched).base).base = i;
     }
-    shrink();
-    return new Dat(entries);
+    maker.shrink();
+    return new Dat(maker.entries);
   }
 
-  public Dat make(String path) throws IOException {
+  public static Dat make(String path) throws IOException {
     return make(new FileInputStream(path));
   }
 
 
-  public Dat make(InputStream in) throws IOException {
+  public static Dat make(InputStream in) throws IOException {
     BufferedReader br = new BufferedReader(new InputStreamReader(in));
     String line;
     List<String> lexicon = new ArrayList<>();
