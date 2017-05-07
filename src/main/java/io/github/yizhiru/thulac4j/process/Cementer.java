@@ -25,6 +25,11 @@ public class Cementer implements Serializable {
     this.pos = pos;
   }
 
+  public Cementer(Dat dat, String pos) {
+    this.dat = dat;
+    this.pos = pos;
+  }
+
   public Cementer() {
   }
 

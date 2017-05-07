@@ -4,11 +4,14 @@ import io.github.yizhiru.thulac4j.base.CwsModel;
 import io.github.yizhiru.thulac4j.base.NGramFeature;
 import io.github.yizhiru.thulac4j.base.POCS;
 import io.github.yizhiru.thulac4j.base.Util;
+import io.github.yizhiru.thulac4j.dat.Dat;
+import io.github.yizhiru.thulac4j.dat.DatMaker;
 import io.github.yizhiru.thulac4j.process.Cementer;
 import io.github.yizhiru.thulac4j.process.Decoder;
 import io.github.yizhiru.thulac4j.process.Ruler;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,7 +51,8 @@ public abstract class Segmenter<T> {
   }
 
 
-  public void setUserWordsPath(String path) throws FileNotFoundException {
-    uw = new Cementer(path, "uw");
+  public void setUserWordsPath(String path) throws IOException {
+    Dat dat = DatMaker.make(path);
+    uw = new Cementer(dat, "uw");
   }
 }
