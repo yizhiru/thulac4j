@@ -43,7 +43,9 @@ public class SegOnly extends Segmenter<String> {
     }
     model.ns.cement(result);
     model.idiom.cement(result);
-    if (uw != null) uw.cement(result);
+    if (uws != null) {
+      uws.forEach(uw -> uw.cement(result));
+    }
     return result;
   }
 }

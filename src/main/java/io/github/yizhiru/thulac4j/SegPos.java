@@ -44,7 +44,9 @@ public class SegPos extends Segmenter<SegItem> {
     }
     model.ns.cementPos(result);
     model.idiom.cementPos(result);
-    if (uw != null) uw.cementPos(result);
+    if (uws != null) {
+      uws.forEach(uw -> uw.cementPos(result));
+    }
     return result;
   }
 }
