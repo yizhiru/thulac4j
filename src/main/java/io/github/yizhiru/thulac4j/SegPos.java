@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author jyzheng
  */
-public class SegPos extends Segmenter {
+public class SegPos extends Segmenter<SegItem> {
 
   public SegPos(String modelPath) throws FileNotFoundException {
     model = CwsModel.loadModel(modelPath);
