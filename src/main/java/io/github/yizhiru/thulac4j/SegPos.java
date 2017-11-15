@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @author jyzheng
  */
-public class SegPos extends Segmenter {
+public class SegPos extends Segmenter<SegItem> {
 
   public SegPos(String modelPath) throws FileNotFoundException {
     model = CwsModel.loadModel(modelPath);
@@ -44,7 +44,9 @@ public class SegPos extends Segmenter {
     }
     model.ns.cementPos(result);
     model.idiom.cementPos(result);
-    if (uw != null) uw.cementPos(result);
+    if (uws != null) {
+      uws.forEach(uw -> uw.cementPos(result));
+    }
     return result;
   }
 }

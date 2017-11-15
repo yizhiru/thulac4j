@@ -13,7 +13,9 @@ import io.github.yizhiru.thulac4j.process.Ruler;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author jyzheng
@@ -21,7 +23,7 @@ import java.util.List;
 public abstract class Segmenter<T> {
   protected CwsModel model;
   protected int[][] labelTrans;
-  protected Cementer uw;
+  protected List<Cementer> uws;
 
 
 
@@ -50,9 +52,26 @@ public abstract class Segmenter<T> {
     return getResult(cleaned, labels);
   }
 
-
+  @Deprecated
   public void setUserWordsPath(String path) throws IOException {
     Dat dat = DatMaker.make(path);
-    uw = new Cementer(dat, "uw");
+    uws = Collections.singletonList(new Cementer(dat, "uw"));
+  }
+
+  /**
+   * Key: path; Value: pos
+   */
+  public void setUserWordsPath(Map<String, String> pathWithPos) throws IOException {
+    for (Map.Entry<String, String> entry : pathWithPos.entrySet()) {
+      addUserWordsPath(entry.getKey(), entry.getValue());
+    }
+  }
+
+  public void addUserWordsPath(String path, String pos) throws IOException {
+    if (uws == null) {
+      uws = new ArrayList<>();
+    }
+    Dat dat = DatMaker.make(path);
+    uws.add(new Cementer(dat, pos));
   }
 }

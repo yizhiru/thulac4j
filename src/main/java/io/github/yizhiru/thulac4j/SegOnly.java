@@ -1,6 +1,7 @@
 package io.github.yizhiru.thulac4j;
 
 import io.github.yizhiru.thulac4j.base.CwsModel;
+import io.github.yizhiru.thulac4j.base.SegItem;
 import io.github.yizhiru.thulac4j.base.Util;
 
 import java.io.FileNotFoundException;
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  * @author jyzheng
  */
-public class SegOnly extends Segmenter {
+public class SegOnly extends Segmenter<String> {
 
   public SegOnly(String modelPath) throws FileNotFoundException {
     model = CwsModel.loadModel(modelPath);
@@ -42,7 +43,9 @@ public class SegOnly extends Segmenter {
     }
     model.ns.cement(result);
     model.idiom.cement(result);
-    if (uw != null) uw.cement(result);
+    if (uws != null) {
+      uws.forEach(uw -> uw.cement(result));
+    }
     return result;
   }
 }
