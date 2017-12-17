@@ -1,6 +1,8 @@
 .idea
 *.iml
-target
-models/seg_only.bin
-models/seg_pos.bin
-train
+target/
+models/cws_dat.bin
+models/cws_model.bin
+models/model_c_dat.bin
+models/model_c_model.bin
+train/

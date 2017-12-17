@@ -1,220 +1,330 @@
 package io.github.yizhiru.thulac4j.process;
 
-import io.github.yizhiru.thulac4j.base.POCS;
+import io.github.yizhiru.thulac4j.common.CharUtil;
+import io.github.yizhiru.thulac4j.model.POC;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static io.github.yizhiru.thulac4j.common.CharUtil.convertHalfWidth;
+import static io.github.yizhiru.thulac4j.common.CharUtil.isDigit;
+import static io.github.yizhiru.thulac4j.common.CharUtil.isLetter;
+import static io.github.yizhiru.thulac4j.common.CharUtil.isRemainPunctuation;
+import static io.github.yizhiru.thulac4j.common.CharUtil.isSinglePunctuation;
+import static io.github.yizhiru.thulac4j.common.CharUtil.isSkipped;
+
 /**
- * @author jyzheng
+ * 分词规则集合.
  */
-public class Ruler {
+public final class Ruler {
 
-  // size = 58
-  private final static HashSet<Character> Punctuations = new HashSet<>(Arrays.asList(
-          '！', '、', '。', '★', '☆', '（', '）', '《', '》', '，', '【', '】', '—', '‘', '’',
-          '：', '；', '“', '”', '？', '!', '"', '#', '$', '%', '…', '&', '\'', '(', ')', '*',
-          '+', ',', '-', '.', '/', '·', ':', ';', '<', '=', '>', '?', '@', '[', '\\', ']',
-          '^', '_', '◤', '￥', '{', '|', '}', '~', '～'));
+    /**
+     * 清洗结果类.
+     */
+    public static class CleanedResult {
+        /**
+         * 清洗后字符、POC二元组
+         */
+        private List<CharPocTuple> tuples;
 
-  //  private final static HashSet<Character> Spaces = new HashSet<>(Arrays.asList(' ', '　'));
-  private final static Character EngSpace = ' ';
+        /**
+         * 最后一个tuple已提前添加.
+         */
+        private boolean isAppendAhead;
 
-  private final static HashSet<Character> Numbers = new HashSet<>(Arrays.asList(
-          '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-          '０', '１', '２', '３', '４', '５', '６', '７', '８', '９'));
-  private final static HashSet<Character> NumPuns = new HashSet<>(Arrays.asList(
-          '%', '.', ',', '/', '％'));
-
-
-  private static boolean isSkipped(char ch) {
-    return (ch < EngSpace) || Character.isSpaceChar(ch);
-  }
-
-  private static boolean isLetter(char ch) {
-    return Character.getType(ch) == Character.LOWERCASE_LETTER ||
-            Character.getType(ch) == Character.UPPERCASE_LETTER;
-  }
-
-  private static boolean isNumber(char ch) {
-    return Numbers.contains(ch) || NumPuns.contains(ch);
-  }
-
-  private char[] raw;
-  public List<POCS> pocss;
-
-  public Ruler(char[] raw) {
-    this.raw = raw;
-    pocss = new ArrayList<>();
-  }
-
-  /**
-   * 根据标点符号，给每个字符赋予对应的POCS
-   *
-   * @return 清洗后String
-   */
-  public String rulePoc() {
-    int len = raw.length;
-    StringBuilder builder = new StringBuilder(len);
-    boolean hasTitleBegin = false, existed;
-    int titleBegin = 0;
-    for (int i = 0; i < len; ) {
-      // 1. space or control character
-      if (isSkipped(raw[i])) {
-        setPocs(pocss.size() - 1, POCS.ES_POCS);
-        for (i++; i < len && isSkipped(raw[i]); i++) {
+        public CleanedResult(String sentence) {
+            tuples = new ArrayList<>(sentence.length());
+            isAppendAhead = false;
         }
-        if (i < len) {
-          pocss.add(POCS.BS_POCS);
-        }
-      } else {
-        existed = (pocss.size() == builder.length() + 1);
-        // 2. punctuation
-        if (Punctuations.contains(raw[i])) {
-          setCurrPos(existed, POCS.PUN_POCS);
-          setPocs(pocss.size() - 2, POCS.ES_POCS);
-          builder.append(raw[i]);
-          // 处理书名号
-          if (raw[i] == '《') {
-            hasTitleBegin = true;
-            titleBegin = i;
-          } else if (hasTitleBegin && raw[i] == '》') {
-            if (isPossibleTitle(raw, titleBegin + 1, i - 1)) {
-              setWordPos(titleBegin + 1, i - 1, pocss.size() - 2);
+
+        private static class CharPocTuple {
+            /**
+             * 句子的原字符.
+             */
+            public char raw;
+
+            /**
+             * 清洗后字符（对应于raw），比如大写转小写、半角转全角.
+             */
+            public char cleaned;
+
+            /**
+             * 可能POC.
+             */
+            public POC poc;
+
+            public CharPocTuple(char raw, char cleaned, POC poc) {
+                this.raw = raw;
+                this.cleaned = cleaned;
+                this.poc = poc;
             }
-            hasTitleBegin = false;
-          }
-          for (i++; i < len && Punctuations.contains(raw[i]); i++) {
-            pocss.add(POCS.PUN_POCS);
-            builder.append(raw[i]);
-          }
-          if (i < len && !isSkipped(raw[i])) {
-            pocss.add(POCS.BS_POCS);
-          }
-        } // 3. English or Latin words
-        else if (isLetter(raw[i])) {
-          i = wordProcess(existed, i, builder, Ruler::isLetter, false);
-        } // 4. Numbers
-        else if (Numbers.contains(raw[i])) {
-          i = wordProcess(existed, i, builder, Ruler::isNumber, true);
-        } else {
-          setCurrPos(existed, POCS.DEFAULT_POCS);
-          builder.append(raw[i]);
-          i++;
         }
-      }
+
+        public int getLastIndex() {
+            return tuples.size() - 1;
+        }
+
+        public char[] getRawSentence() {
+            int size = tuples.size();
+            char[] rawSentence = new char[size];
+            for (int i = 0; i < size; i++) {
+                rawSentence[i] = tuples.get(i).raw;
+            }
+            return rawSentence;
+        }
+
+        public char[] getCleanedSentence() {
+            int size = tuples.size();
+            char[] cleanedSentence = new char[size];
+            for (int i = 0; i < size; i++) {
+                cleanedSentence[i] = tuples.get(i).cleaned;
+            }
+            return cleanedSentence;
+        }
+
+        public POC[] getSentencePoc() {
+            return tuples.stream()
+                    .map(t -> t.poc)
+                    .toArray(POC[]::new);
+        }
+
+        public boolean isEmpty() {
+            return tuples.isEmpty();
+        }
+
+        /**
+         * 对于index位置的POC求交集
+         *
+         * @param index 所处位置
+         * @param poc   可能POC
+         */
+        private void intersectPoc(int index, POC poc) {
+            if (index < 0 || index >= tuples.size()) {
+                return;
+            }
+            CharPocTuple tuple = tuples.get(index);
+            tuple.poc = tuple.poc.intersect(poc);
+        }
+
+        /**
+         * 设置最后CharPocTuple
+         *
+         * @param ch  字符
+         * @param poc 可能的POC
+         */
+        private void append(char ch, POC poc) {
+            if (isAppendAhead) {
+                intersectPoc(getLastIndex(), poc);
+                isAppendAhead = false;
+            } else {
+                tuples.add(new CharPocTuple(ch, convertHalfWidth(ch), poc));
+            }
+        }
+
+        /**
+         * 尾部提前追加元素.
+         *
+         * @param ch  字符
+         * @param poc 可能的POC
+         */
+        private void appendAhead(char ch, POC poc) {
+            tuples.add(new CharPocTuple(ch, convertHalfWidth(ch), poc));
+            isAppendAhead = true;
+        }
     }
-    setPocs(0, POCS.BS_POCS);
-    setPocs(pocss.size() - 1, POCS.ES_POCS);
-    return builder.toString();
-  }
 
-  /**
-   * 判断前后书名号内的字符串是否为能成词
-   *
-   * @param raw   待分词句子
-   * @param start 前书名号《 后一个index
-   * @param end   后书名号》前一个index
-   * @return 若能则true
-   */
-  private static boolean isPossibleTitle(char[] raw, int start, int end) {
-    if (end - start > 8 || end - start <= 0)
-      return false;
-    for (int i = start; i <= end; i++) {
-      if (Punctuations.contains(raw[i]) || isSkipped(raw[i])) return false;
+    /**
+     * 依据规则得到每个字符对应的POC
+     *
+     * @param sentence 待分词句子
+     * @return 清洗后String
+     */
+    public static CleanedResult ruleClean(String sentence) {
+        int len = sentence.length();
+        char[] raw = sentence.toCharArray();
+        CleanedResult result = new CleanedResult(sentence);
+        boolean hasTitleBegin = false;
+        int titleBegin = 0;
+        for (int i = 0; i < len; ) {
+            char ch = raw[i];
+            // 1. Space or control character
+            if (isSkipped(ch)) {
+                result.intersectPoc(result.getLastIndex(), POC.ES_POC);
+                for (i++; i < len; i++) {
+                    if (!isSkipped(raw[i])) {
+                        break;
+                    }
+                }
+                // 处理后面字符
+                if (i < len) {
+                    result.appendAhead(raw[i], POC.BS_POC);
+                }
+            }
+
+            // 2. Punctuation
+            else if (isSinglePunctuation(ch)) {
+                result.intersectPoc(result.getLastIndex(), POC.ES_POC);
+                result.append(ch, POC.PUNCTUATION_POC);
+                // 前书名号
+                if (ch == '《') {
+                    hasTitleBegin = true;
+                    titleBegin = i;
+                }
+                // 后书名号
+                else if (hasTitleBegin && ch == '》') {
+                    if (isPossibleTitle(raw, titleBegin + 1, i - 1)) {
+                        setWordPoc(result,
+                                titleBegin + 1,
+                                i - 1,
+                                result.getLastIndex() - 1
+                        );
+                    }
+                    hasTitleBegin = false;
+                }
+                i++;
+                // 处理后面字符
+                if (i < len && !isSkipped(raw[i])) {
+                    result.appendAhead(raw[i], POC.BS_POC);
+                }
+            }
+
+            // 3. English or Latin words
+            else if (isLetter(ch)) {
+                i = processWord(raw,
+                        result,
+                        i,
+                        CharUtil::mayBeLetterWord,
+                        false);
+            }
+
+            // 4. Numbers
+            else if (isDigit(ch)) {
+                i = processWord(raw,
+                        result,
+                        i,
+                        CharUtil::mayBeNumeral,
+                        true);
+            }
+
+            // 5. 余下标点
+            else if (isRemainPunctuation(ch)) {
+                result.intersectPoc(result.getLastIndex(), POC.ES_POC);
+                result.append(ch, POC.PUNCTUATION_POC);
+                result.appendAhead(raw[i + 1], POC.BS_POC);
+                i++;
+            }
+
+            // 6. Else
+            else {
+                result.append(ch, POC.DEFAULT_POC);
+                i++;
+            }
+        }
+        result.intersectPoc(0, POC.BS_POC);
+        result.intersectPoc(result.getLastIndex(), POC.ES_POC);
+        return result;
     }
-    return true;
-  }
 
-  /**
-   * set word POCS
-   *
-   * @param start    the start index of raw sentence
-   * @param end      the end index of raw sentence
-   * @param endIndex the end index of poses
-   */
-  private void setWordPos(int start, int end, int endIndex) {
-    if (start == end) {
-      pocss.set(endIndex, POCS.S_POCS);
-      return;
+    /**
+     * 判断前后书名号内的字符串是否为能成词
+     *
+     * @param sentence 待分词句子
+     * @param start    前书名号《 后一个index
+     * @param end      后书名号》前一个index
+     * @return 若能则true
+     */
+    private static boolean isPossibleTitle(char[] sentence, int start, int end) {
+        if (end - start > 8 || end - start <= 0) {
+            return false;
+        }
+        for (int i = start; i <= end; i++) {
+            if (isSinglePunctuation(sentence[i]) || isSkipped(sentence[i])) {
+                return false;
+            }
+        }
+        return true;
     }
-    int startIndex = endIndex - end + start;
-    pocss.set(startIndex, POCS.B_POCS);
-    for (startIndex++; startIndex < endIndex; startIndex++) {
-      pocss.set(startIndex, POCS.M_POCS);
+
+    /**
+     * 设置单词或连续数字POC
+     *
+     * @param result    清洗句子结果
+     * @param wordStart 词的起始位置（在句子中的index值）
+     * @param wordEnd   词的结束位置（在句子中的index值）
+     * @param endIndex  wordEnd对应在result的index值
+     */
+    private static void setWordPoc(
+            CleanedResult result,
+            int wordStart,
+            int wordEnd,
+            int endIndex) {
+        // 单独字符成词
+        if (wordStart == wordEnd) {
+            result.intersectPoc(endIndex, POC.SINGLE_POC);
+            return;
+        }
+        // 对应起始位置
+        int startIndex = endIndex - wordEnd + wordStart;
+        result.intersectPoc(startIndex, POC.BEGIN_POC);
+        for (startIndex++; startIndex < endIndex; startIndex++) {
+            result.intersectPoc(startIndex, POC.MIDDLE_POC);
+        }
+        result.intersectPoc(endIndex, POC.END_POC);
     }
-    pocss.set(endIndex, POCS.E_POCS);
-  }
 
+    /**
+     * 处理单词或连续数字
+     *
+     * @param wordStart 在字符串raw中的起始位置
+     * @param condition 函数式接口，判断是否为字母或数字
+     * @param isNumeral 单词or数字
+     * @return 词结束后的下一个字符所处位置
+     */
+    private static int processWord(
+            char[] sentence,
+            CleanedResult result,
+            int wordStart,
+            Predicate<Character> condition,
+            boolean isNumeral) {
+        POC b, m, e, s;
+        if (isNumeral) {
+            b = POC.BEGIN_M_POC;
+            m = POC.MIDDLE_M_POC;
+            e = POC.END_M_POC;
+            s = POC.SINGLE_M_POC;
+        } else {
+            b = POC.BEGIN_POC;
+            m = POC.MIDDLE_POC;
+            e = POC.END_POC;
+            s = POC.SINGLE_POC;
+        }
 
-  /**
-   * 对于pocss中处于index置pocs
-   *
-   * @param index 所处位置
-   * @param pocs  POCS
-   */
-  private void setPocs(int index, POCS pocs) {
-    if (index < 0 || index >= pocss.size()) return;
-    POCS p = pocss.get(index);
-    pocss.set(index, p.intersect(pocs));
-  }
+        // 处理前一字符
+        result.intersectPoc(result.getLastIndex(), POC.ES_POC);
 
-  /**
-   * 设置当前位置的POCS
-   *
-   * @param existed 是否已存在
-   * @param curr    POCS
-   */
-  private void setCurrPos(boolean existed, POCS curr) {
-    if (existed) setPocs(pocss.size() - 1, curr);
-    else pocss.add(curr);
-  }
-
-  /**
-   * 处理单词或连续数字
-   *
-   * @param existed   是否已存在
-   * @param start     在字符串raw中的起始位置
-   * @param builder   StringBuilder
-   * @param condition 函数式接口，判断是否为字母或数字
-   * @param isNumeral 单词or数字
-   * @return 词结束后的下一个字符所处位置
-   */
-  private int wordProcess(boolean existed, int start, StringBuilder builder,
-                          Predicate<Character> condition, boolean isNumeral) {
-    builder.append(Character.toLowerCase(raw[start]));
-    POCS b, m, e, s;
-    if (isNumeral) {
-      b = POCS.B_M_POC;
-      m = POCS.M_M_POC;
-      e = POCS.E_M_POC;
-      s = POCS.S_M_POC;
-    } else {
-      b = POCS.B_POCS;
-      m = POCS.M_POCS;
-      e = POCS.E_POCS;
-      s = POCS.S_POCS;
+        int len = sentence.length;
+        int i = wordStart;
+        i++;
+        // 单独成词
+        if (i == len
+                || (i < len && !condition.test(sentence[i]))) {
+            result.append(sentence[i - 1], s);
+        }
+        // 连续成词
+        else {
+            result.append(sentence[i - 1], b);
+            for (; i + 1 < len && condition.test(sentence[i + 1]); i++) {
+                result.append(sentence[i], m);
+            }
+            result.append(sentence[i], e);
+            i++;
+        }
+        // 处理成词后的下一字符
+        if (i < len && !isSkipped(sentence[i])) {
+            result.appendAhead(sentence[i], POC.BS_POC);
+        }
+        return i;
     }
-    int i = start;
-    if (i + 1 == raw.length || (i + 1 < raw.length && !condition.test(raw[i + 1]))) {
-      setCurrPos(existed, s);
-      setPocs(pocss.size() - 2, POCS.ES_POCS);
-      i++;
-    } else {
-      setCurrPos(existed, b);
-      setPocs(pocss.size() - 2, POCS.ES_POCS);
-      for (i++; i < raw.length && condition.test(raw[i]); i++) {
-        pocss.add(m);
-        builder.append(Character.toLowerCase(raw[i]));
-      }
-      pocss.set(pocss.size() - 1, e);
-    }
-    if (i < raw.length && !isSkipped(raw[i]))
-      pocss.add(POCS.BS_POCS);
-    return i;
-  }
-
 }
+

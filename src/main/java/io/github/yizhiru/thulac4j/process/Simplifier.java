@@ -1,36 +1,55 @@
 package io.github.yizhiru.thulac4j.process;
 
-import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import io.github.yizhiru.thulac4j.base.Util;
+import io.github.yizhiru.thulac4j.common.ModelPath;
 
-import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
+import java.nio.channels.FileChannel;
 import java.util.HashMap;
-import java.util.zip.InflaterInputStream;
 
 /**
- * @author jyzheng
+ * 繁体转简体.
  */
-public class Simplifier {
+public final class Simplifier {
 
-  private HashMap<Character, Character> t2sMap;
+    private HashMap<Integer, Integer> t2sMap;
 
-  public Simplifier() throws FileNotFoundException {
-    Kryo kryo = new Kryo();
-    Input input = new Input(new InflaterInputStream(
-            this.getClass().getResourceAsStream(Util.t2s)));
-    t2sMap = kryo.readObject(input, HashMap.class);
-    input.close();
-  }
+    public Simplifier() throws IOException, URISyntaxException {
+        File file = new File(this.getClass()
+                .getResource(ModelPath.T2S_PATH)
+                .toURI());
+        int charNum = (int) file.length() / 8;
 
-  // 将繁体汉字转为简体汉字
-  public String t2s(String raw) {
-    StringBuilder builder = new StringBuilder(raw.length());
-    for (Character ch : raw.toCharArray()) {
-      builder.append(t2sMap.getOrDefault(ch, ch));
+        FileChannel channel = new FileInputStream(file).getChannel();
+        IntBuffer intBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size())
+                .order(ByteOrder.LITTLE_ENDIAN)
+                .asIntBuffer();
+        int[] traditions = new int[charNum];
+        int[] simples = new int[charNum];
+        intBuffer.get(traditions);
+        intBuffer.get(simples);
+        t2sMap = new HashMap<>(charNum);
+        for (int i = 0; i < charNum; i++) {
+            t2sMap.put(traditions[i], simples[i]);
+        }
     }
-    return builder.toString();
-  }
 
-
+    /**
+     * 将繁体汉字转为简体汉字
+     *
+     * @param sentence 输入句子
+     * @return 简体字化句子
+     */
+    public String t2s(String sentence) {
+        StringBuilder builder = new StringBuilder(sentence.length());
+        for (char ch : sentence.toCharArray()) {
+            int simplifiedChar = t2sMap.getOrDefault((int) ch, (int) ch);
+            builder.append((char) simplifiedChar);
+        }
+        return builder.toString();
+    }
 }
