@@ -15,7 +15,7 @@ thulac4j是[THULAC](http://thulac.thunlp.org/)的高效Java 8实现，具有分�
 <dependency>
   <groupId>io.github.yizhiru</groupId>
   <artifactId>thulac4j</artifactId>
-  <version>${thulac4j.version}</version>
+  <version>1.3.0</version>
 </dependency>
 ```
 
@@ -29,12 +29,12 @@ thulac4j支持两种分词模式：
 // SegOnly mode
 String sentence = "滔滔的流水，向着波士顿湾无声逝去";
 SegOnly seg = new SegOnly("models/cws_model.bin", "models/cws_dat.bin");
-System.out.println(seg.segment(sentence));
+List<String> words = seg.segment(sentence);
 // [滔滔, 的, 流水, ，, 向着, 波士顿湾, 无声, 逝去]
 
 // SegPos mode
 SegPos pos = new SegPos("models/model_c_model.bin", "models/model_c_dat.bin");
-System.out.println(pos.segment(sentence));
+List<SegItem> words = pos.segment(sentence);
 // [滔滔/a, 的/u, 流水/n, ，/w, 向着/p, 波士顿湾/ns, 无声/v, 逝去/v]
 ```
 
