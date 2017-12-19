@@ -1,6 +1,6 @@
 package io.github.yizhiru.thulac4j.process;
 
-import io.github.yizhiru.thulac4j.common.ModelPath;
+import io.github.yizhiru.thulac4j.common.ModelPaths;
 import io.github.yizhiru.thulac4j.model.SegItem;
 import org.junit.Test;
 
@@ -16,7 +16,7 @@ public class DATCementerTest {
     @Test
     public void cement() throws IOException {
         DATCementer cementer = new DATCementer(
-                this.getClass().getResourceAsStream(ModelPath.NS_BIN_PATH),
+                this.getClass().getResourceAsStream(ModelPaths.NS_BIN_PATH),
                 "ns");
         List<SegItem> segItems = new ArrayList<>(Arrays.asList(
                 new SegItem("黑", null),
@@ -27,7 +27,7 @@ public class DATCementerTest {
         assertEquals("[黑龙江/ns]", segItems.toString());
 
         cementer = new DATCementer(
-                this.getClass().getResourceAsStream(ModelPath.IDIOM_BIN_PATH),
+                this.getClass().getResourceAsStream(ModelPaths.IDIOM_BIN_PATH),
                 "i");
         segItems = new ArrayList<>(Arrays.asList(
                 new SegItem("掉", null),

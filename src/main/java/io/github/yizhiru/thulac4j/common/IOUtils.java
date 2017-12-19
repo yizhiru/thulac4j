@@ -8,14 +8,14 @@ import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 
 /**
- * IO Util, 参考 commons-io 包中类 IOUtils 实现.
+ * IO Utils, 参考 commons-io 包中类 IOUtils 实现.
  */
 public final class IOUtils {
 
     /**
      * Represents the end-of-file (or stream).
      */
-    public static final int EOF = -1;
+    private static final int EOF = -1;
 
     /**
      * The default buffer size  to use for copy.

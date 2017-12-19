@@ -1,6 +1,6 @@
 package io.github.yizhiru.thulac4j.process;
 
-import io.github.yizhiru.thulac4j.common.CharUtil;
+import io.github.yizhiru.thulac4j.common.CharUtils;
 import io.github.yizhiru.thulac4j.model.SegItem;
 
 import java.util.Arrays;
@@ -39,7 +39,7 @@ public class TimeCementer {
      */
     private static boolean isNumber(String word) {
         for (char ch : word.toCharArray()) {
-            if (!CharUtil.isDigit(ch)) {
+            if (!CharUtils.isDigit(ch)) {
                 return false;
             }
         }

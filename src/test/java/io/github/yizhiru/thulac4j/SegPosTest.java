@@ -5,7 +5,6 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import static io.github.yizhiru.thulac4j.BaseSegmenterTest.SEG_POS_FEATURES_PATH;
@@ -153,14 +152,14 @@ public class SegPosTest {
 
         long length = 0L;
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000; ++i) {
+        for (int i = 0; i < 2000; ++i) {
             for (String sentence : SENTENCES) {
                 segmenter.segment(sentence);
                 length += sentence.getBytes(StandardCharsets.UTF_8).length;
             }
         }
         long elapsed = (System.currentTimeMillis() - start);
-        System.out.println(String.format("time elapsed: %d ms, rate: %f kb/s.",
+        System.out.println(String.format("time elapsed: %d ms, rate: %.2f kb/s.",
                 elapsed, (length * 1.0) / 1024.0f / (elapsed * 1.0 / 1000.0f)));
     }
 }
