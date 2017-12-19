@@ -1,5 +1,7 @@
 package io.github.yizhiru.thulac4j.dat;
 
+import io.github.yizhiru.thulac4j.common.IOUtils;
+
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -106,30 +108,11 @@ public class Dat implements Serializable {
      * @return DAT模型
      */
     public static Dat loadDat(InputStream inputStream) throws IOException {
-        ReadableByteChannel channel = Channels.newChannel(inputStream);
-        ByteBuffer byteBuffer = ByteBuffer.allocate(8192)
-                .order(ByteOrder.LITTLE_ENDIAN);
-        channel.read(byteBuffer);
-        byteBuffer.flip();
-        int len = byteBuffer.getInt();
-        int[] arr = new int[len];
-        int i;
-        for (i = 0; i < len && byteBuffer.hasRemaining(); i++) {
-            arr[i] = byteBuffer.getInt();
-        }
-        byteBuffer.clear();
-        while (channel.read(byteBuffer) != -1) {
-            byteBuffer.flip();
-            for (; i < len && byteBuffer.hasRemaining(); i++) {
-                arr[i] = byteBuffer.getInt();
-            }
-            byteBuffer.clear();
-        }
-        channel.close();
-
+        int[] array = IOUtils.toIntArray(inputStream);
+        int len = array[0];
         List<Dat.Entry> entries = new ArrayList<>(len / 2);
-        for (int j = 0; j < len; j += 2) {
-            entries.add(new Dat.Entry(arr[j], arr[j + 1]));
+        for (int i = 1; i < len; i += 2) {
+            entries.add(new Dat.Entry(array[i], array[i + 1]));
         }
         return new Dat(entries);
     }

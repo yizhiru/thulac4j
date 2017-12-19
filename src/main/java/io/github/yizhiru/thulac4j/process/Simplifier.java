@@ -1,14 +1,12 @@
 package io.github.yizhiru.thulac4j.process;
 
+import io.github.yizhiru.thulac4j.common.IOUtils;
 import io.github.yizhiru.thulac4j.common.ModelPath;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URISyntaxException;
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
-import java.nio.channels.FileChannel;
 import java.util.HashMap;
 
 /**
@@ -16,25 +14,17 @@ import java.util.HashMap;
  */
 public final class Simplifier {
 
-    private HashMap<Integer, Integer> t2sMap;
+    private HashMap<Character, Character> t2sMap;
 
-    public Simplifier() throws IOException, URISyntaxException {
-        File file = new File(this.getClass()
-                .getResource(ModelPath.T2S_PATH)
-                .toURI());
-        int charNum = (int) file.length() / 8;
-
-        FileChannel channel = new FileInputStream(file).getChannel();
-        IntBuffer intBuffer = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size())
-                .order(ByteOrder.LITTLE_ENDIAN)
-                .asIntBuffer();
-        int[] traditions = new int[charNum];
-        int[] simples = new int[charNum];
-        intBuffer.get(traditions);
-        intBuffer.get(simples);
-        t2sMap = new HashMap<>(charNum);
-        for (int i = 0; i < charNum; i++) {
-            t2sMap.put(traditions[i], simples[i]);
+    public Simplifier() throws IOException {
+        int[] array = IOUtils.toIntArray(
+                this.getClass().getResourceAsStream(ModelPath.T2S_PATH)
+        );
+        // t2s.dat 文件包含繁体字符共有2800个
+        int traditionNum = array.length / 2;
+        t2sMap = new HashMap<>(traditionNum);
+        for (int i = 0; i < traditionNum; i++) {
+            t2sMap.put((char) array[i], (char) array[i + traditionNum]);
         }
     }
 
@@ -47,8 +37,7 @@ public final class Simplifier {
     public String t2s(String sentence) {
         StringBuilder builder = new StringBuilder(sentence.length());
         for (char ch : sentence.toCharArray()) {
-            int simplifiedChar = t2sMap.getOrDefault((int) ch, (int) ch);
-            builder.append((char) simplifiedChar);
+            builder.append(t2sMap.getOrDefault(ch, ch));
         }
         return builder.toString();
     }

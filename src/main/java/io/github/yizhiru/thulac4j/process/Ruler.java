@@ -33,8 +33,8 @@ public final class Ruler {
          */
         private boolean isAppendAhead;
 
-        public CleanedResult(String sentence) {
-            tuples = new ArrayList<>(sentence.length());
+        public CleanedResult(int initialCapacity) {
+            tuples = new ArrayList<>(initialCapacity);
             isAppendAhead = false;
         }
 
@@ -143,7 +143,7 @@ public final class Ruler {
     public static CleanedResult ruleClean(String sentence) {
         int len = sentence.length();
         char[] raw = sentence.toCharArray();
-        CleanedResult result = new CleanedResult(sentence);
+        CleanedResult result = new CleanedResult(sentence.length());
         boolean hasTitleBegin = false;
         int titleBegin = 0;
         for (int i = 0; i < len; ) {
