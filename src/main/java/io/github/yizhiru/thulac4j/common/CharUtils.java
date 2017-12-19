@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public final class CharUtil {
+public final class CharUtils {
 
     /**
      * 标点符合集合

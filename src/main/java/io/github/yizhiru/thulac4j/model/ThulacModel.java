@@ -1,6 +1,6 @@
 package io.github.yizhiru.thulac4j.model;
 
-import io.github.yizhiru.thulac4j.common.ModelPath;
+import io.github.yizhiru.thulac4j.common.ModelPaths;
 import io.github.yizhiru.thulac4j.dat.Dat;
 import io.github.yizhiru.thulac4j.process.DATCementer;
 
@@ -102,9 +102,9 @@ public final class ThulacModel {
 
         String labelPath;
         if (labelSize == 4) {
-            labelPath = ModelPath.SEG_ONLY_LABEL_PATH;
+            labelPath = ModelPaths.SEG_ONLY_LABEL_PATH;
         } else {
-            labelPath = ModelPath.SEG_POS_LABEL_PATH;
+            labelPath = ModelPaths.SEG_POS_LABEL_PATH;
         }
 
         // Load feature DAT
@@ -201,10 +201,10 @@ public final class ThulacModel {
                 labelValues,
                 allowTabular,
                 new DATCementer(
-                        this.getClass().getResourceAsStream(ModelPath.NS_BIN_PATH),
+                        this.getClass().getResourceAsStream(ModelPaths.NS_BIN_PATH),
                         "ns"),
                 new DATCementer(
-                        this.getClass().getResourceAsStream(ModelPath.IDIOM_BIN_PATH),
+                        this.getClass().getResourceAsStream(ModelPaths.IDIOM_BIN_PATH),
                         "i")
         );
     }

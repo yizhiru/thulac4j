@@ -1,6 +1,6 @@
 package io.github.yizhiru.thulac4j.dat;
 
-import io.github.yizhiru.thulac4j.common.ModelPath;
+import io.github.yizhiru.thulac4j.common.ModelPaths;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -13,7 +13,7 @@ public class DatTest {
 
     @Test
     public void isMatched() throws IOException {
-        Dat dat = Dat.loadDat("." + ModelPath.NS_BIN_PATH);
+        Dat dat = Dat.loadDat("." + ModelPaths.NS_BIN_PATH);
         assertTrue(dat.isPrefixMatched("黑龙江"));
         assertTrue(dat.isWordMatched("黑龙江"));
         assertTrue(dat.isWordMatched("齐齐哈尔"));
@@ -30,14 +30,14 @@ public class DatTest {
     @Test
     public void serialize() throws IOException {
         String[] dictPaths = new String[]{
-                ModelPath.IDIOM_DICT_PATH,
-                ModelPath.NS_DICT_PATH,
-                ModelPath.STOP_WORDS_DICT_PATH,
+                ModelPaths.IDIOM_DICT_PATH,
+                ModelPaths.NS_DICT_PATH,
+                ModelPaths.STOP_WORDS_DICT_PATH,
         };
         String[] binPaths = new String[]{
-                "." + ModelPath.IDIOM_BIN_PATH,
-                "." + ModelPath.NS_BIN_PATH,
-                "." + ModelPath.STOP_WORDS_BIN_PATH,
+                "." + ModelPaths.IDIOM_BIN_PATH,
+                "." + ModelPaths.NS_BIN_PATH,
+                "." + ModelPaths.STOP_WORDS_BIN_PATH,
         };
         for (int i = 0; i < dictPaths.length; i++) {
             Dat expect = DatMaker.make(dictPaths[i]);

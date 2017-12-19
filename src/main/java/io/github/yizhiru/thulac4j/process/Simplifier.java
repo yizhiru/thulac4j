@@ -1,12 +1,9 @@
 package io.github.yizhiru.thulac4j.process;
 
 import io.github.yizhiru.thulac4j.common.IOUtils;
-import io.github.yizhiru.thulac4j.common.ModelPath;
+import io.github.yizhiru.thulac4j.common.ModelPaths;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.IntBuffer;
 import java.util.HashMap;
 
 /**
@@ -18,7 +15,7 @@ public final class Simplifier {
 
     public Simplifier() throws IOException {
         int[] array = IOUtils.toIntArray(
-                this.getClass().getResourceAsStream(ModelPath.T2S_PATH)
+                this.getClass().getResourceAsStream(ModelPaths.T2S_PATH)
         );
         // t2s.dat 文件包含繁体字符共有2800个
         int traditionNum = array.length / 2;

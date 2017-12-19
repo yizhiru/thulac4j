@@ -3,7 +3,7 @@ package io.github.yizhiru.thulac4j.common;
 /**
  * 模型文件路径名
  */
-public final class ModelPath {
+public final class ModelPaths {
 
     public static final String NS_DICT_PATH = "dicts/ns.dict";
     public static final String IDIOM_DICT_PATH = "dicts/idiom.dict";

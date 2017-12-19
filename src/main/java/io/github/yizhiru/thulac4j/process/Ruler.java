@@ -1,18 +1,18 @@
 package io.github.yizhiru.thulac4j.process;
 
-import io.github.yizhiru.thulac4j.common.CharUtil;
+import io.github.yizhiru.thulac4j.common.CharUtils;
 import io.github.yizhiru.thulac4j.model.POC;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static io.github.yizhiru.thulac4j.common.CharUtil.convertHalfWidth;
-import static io.github.yizhiru.thulac4j.common.CharUtil.isDigit;
-import static io.github.yizhiru.thulac4j.common.CharUtil.isLetter;
-import static io.github.yizhiru.thulac4j.common.CharUtil.isRemainPunctuation;
-import static io.github.yizhiru.thulac4j.common.CharUtil.isSinglePunctuation;
-import static io.github.yizhiru.thulac4j.common.CharUtil.isSkipped;
+import static io.github.yizhiru.thulac4j.common.CharUtils.convertHalfWidth;
+import static io.github.yizhiru.thulac4j.common.CharUtils.isDigit;
+import static io.github.yizhiru.thulac4j.common.CharUtils.isLetter;
+import static io.github.yizhiru.thulac4j.common.CharUtils.isRemainPunctuation;
+import static io.github.yizhiru.thulac4j.common.CharUtils.isSinglePunctuation;
+import static io.github.yizhiru.thulac4j.common.CharUtils.isSkipped;
 
 /**
  * 分词规则集合.
@@ -194,7 +194,7 @@ public final class Ruler {
                 i = processWord(raw,
                         result,
                         i,
-                        CharUtil::mayBeLetterWord,
+                        CharUtils::mayBeLetterWord,
                         false);
             }
 
@@ -203,7 +203,7 @@ public final class Ruler {
                 i = processWord(raw,
                         result,
                         i,
-                        CharUtil::mayBeNumeral,
+                        CharUtils::mayBeNumeral,
                         true);
             }
 

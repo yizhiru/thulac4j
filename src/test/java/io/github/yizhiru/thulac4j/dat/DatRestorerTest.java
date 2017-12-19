@@ -1,6 +1,6 @@
 package io.github.yizhiru.thulac4j.dat;
 
-import io.github.yizhiru.thulac4j.common.ModelPath;
+import io.github.yizhiru.thulac4j.common.ModelPaths;
 import org.junit.Test;
 
 import java.io.FileInputStream;
@@ -23,14 +23,14 @@ public class DatRestorerTest {
     @Test
     public void restore() throws IOException {
         String[] binPaths = new String[]{
-                "." + ModelPath.NS_BIN_PATH,
-                "." + ModelPath.IDIOM_BIN_PATH,
-                "." + ModelPath.STOP_WORDS_BIN_PATH
+                "." + ModelPaths.NS_BIN_PATH,
+                "." + ModelPaths.IDIOM_BIN_PATH,
+                "." + ModelPaths.STOP_WORDS_BIN_PATH
         };
         String[] dictPaths = new String[]{
-                ModelPath.NS_DICT_PATH,
-                ModelPath.IDIOM_DICT_PATH,
-                ModelPath.STOP_WORDS_DICT_PATH
+                ModelPaths.NS_DICT_PATH,
+                ModelPaths.IDIOM_DICT_PATH,
+                ModelPaths.STOP_WORDS_DICT_PATH
         };
 
         for (int i = 0; i < binPaths.length; i++) {

@@ -1,6 +1,6 @@
 package io.github.yizhiru.thulac4j.dat;
 
-import io.github.yizhiru.thulac4j.common.ModelPath;
+import io.github.yizhiru.thulac4j.common.ModelPaths;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -16,9 +16,9 @@ public class DatMakerTest {
     @Test
     public void make() throws IOException {
         String[] paths = new String[]{
-                ModelPath.NS_DICT_PATH,
-                ModelPath.IDIOM_DICT_PATH,
-                ModelPath.STOP_WORDS_DICT_PATH
+                ModelPaths.NS_DICT_PATH,
+                ModelPaths.IDIOM_DICT_PATH,
+                ModelPaths.STOP_WORDS_DICT_PATH
         };
         for (String path : paths) {
             List<String> lexicon = Files.lines(Paths.get(path))

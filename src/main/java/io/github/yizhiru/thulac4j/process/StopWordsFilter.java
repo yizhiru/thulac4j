@@ -1,6 +1,6 @@
 package io.github.yizhiru.thulac4j.process;
 
-import io.github.yizhiru.thulac4j.common.ModelPath;
+import io.github.yizhiru.thulac4j.common.ModelPaths;
 import io.github.yizhiru.thulac4j.dat.Dat;
 
 import java.io.IOException;
@@ -15,7 +15,7 @@ public class StopWordsFilter {
 
     public StopWordsFilter() throws IOException, ClassNotFoundException {
         stop = Dat.loadDat(
-                this.getClass().getResourceAsStream(ModelPath.STOP_WORDS_BIN_PATH)
+                this.getClass().getResourceAsStream(ModelPaths.STOP_WORDS_BIN_PATH)
         );
     }
 

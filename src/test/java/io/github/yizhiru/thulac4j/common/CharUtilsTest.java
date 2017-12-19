@@ -2,10 +2,10 @@ package io.github.yizhiru.thulac4j.common;
 
 import org.junit.Test;
 
-import static io.github.yizhiru.thulac4j.common.CharUtil.isHan;
+import static io.github.yizhiru.thulac4j.common.CharUtils.isHan;
 import static org.junit.Assert.assertEquals;
 
-public class CharUtilTest {
+public class CharUtilsTest {
 
     @Test
     public void checkIsHan() {
