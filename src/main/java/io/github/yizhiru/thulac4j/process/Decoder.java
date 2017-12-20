@@ -80,9 +80,7 @@ public final class Decoder {
         // DP求解
         for (int i = 0; i < len; i++) {
             int[] labels = model.allowTabular[pocs[i].ordinal()];
-            int label;
-            for (int j = 0; j < labels.length; j++) {
-                label = labels[j];
+            for (int label : labels) {
                 alpha = pathTabular[i][label];
                 if (i == 0) {
                     alpha.preLabel = INITIAL_PREVIOUS_LABEL;
