@@ -35,12 +35,11 @@ List<String> words = seg.segment(sentence);
 // SegPos mode
 SegPos pos = new SegPos("models/model_c_model.bin", "models/model_c_dat.bin");
 List<SegItem> words = pos.segment(sentence);
-nsCementer
 ```
 
 模型数据较大，没有放在jar包与源码。训练模型下载及更多使用说明，请参看[Getting Started](https://github.com/yizhiru/thulac4j/wiki).
 
 
-最后感谢THUNLP实验室！没有你们的努力，便没有这么好用的THULAC，也就没有thulac4j。
+最后感谢THUNLP实验室！感谢无私地开源THULAC！
 
 
