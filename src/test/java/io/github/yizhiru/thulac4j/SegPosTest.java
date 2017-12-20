@@ -152,7 +152,7 @@ public class SegPosTest {
 
         long length = 0L;
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 2000; ++i) {
+        for (int i = 0; i < 1000; ++i) {
             for (String sentence : SENTENCES) {
                 segmenter.segment(sentence);
                 length += sentence.getBytes(StandardCharsets.UTF_8).length;

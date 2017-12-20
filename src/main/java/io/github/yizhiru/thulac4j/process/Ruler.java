@@ -108,6 +108,19 @@ public final class Ruler {
         }
 
         /**
+         * 按照index 值设置 poc
+         *
+         * @param index 索引值
+         * @param poc   POC
+         */
+        private void setPocByIndex(int index, POC poc) {
+            if (index < 0 || index >= tuples.size()) {
+                return;
+            }
+            tuples.get(index).poc = poc;
+        }
+
+        /**
          * 设置最后CharPocTuple
          *
          * @param ch  字符
@@ -174,11 +187,10 @@ public final class Ruler {
                 // 后书名号
                 else if (hasTitleBegin && ch == '》') {
                     if (isPossibleTitle(raw, titleBegin + 1, i - 1)) {
-                        setWordPoc(result,
+                        setTitleWordPoc(result,
                                 titleBegin + 1,
                                 i - 1,
-                                result.getLastIndex() - 1
-                        );
+                                result.getLastIndex() - 1);
                     }
                     hasTitleBegin = false;
                 }
@@ -211,8 +223,10 @@ public final class Ruler {
             else if (isRemainPunctuation(ch)) {
                 result.intersectPoc(result.getLastIndex(), POC.ES_POC);
                 result.append(ch, POC.PUNCTUATION_POC);
-                result.appendAhead(raw[i + 1], POC.BS_POC);
                 i++;
+                if (i < len && !isSkipped(raw[i])) {
+                    result.appendAhead(raw[i], POC.BS_POC);
+                }
             }
 
             // 6. Else
@@ -247,14 +261,14 @@ public final class Ruler {
     }
 
     /**
-     * 设置单词或连续数字POC
+     * 设置书名号内为一个词.
      *
      * @param result    清洗句子结果
      * @param wordStart 词的起始位置（在句子中的index值）
      * @param wordEnd   词的结束位置（在句子中的index值）
      * @param endIndex  wordEnd对应在result的index值
      */
-    private static void setWordPoc(
+    private static void setTitleWordPoc(
             CleanedResult result,
             int wordStart,
             int wordEnd,
@@ -266,11 +280,11 @@ public final class Ruler {
         }
         // 对应起始位置
         int startIndex = endIndex - wordEnd + wordStart;
-        result.intersectPoc(startIndex, POC.BEGIN_POC);
+        result.setPocByIndex(startIndex, POC.BEGIN_POC);
         for (startIndex++; startIndex < endIndex; startIndex++) {
-            result.intersectPoc(startIndex, POC.MIDDLE_POC);
+            result.setPocByIndex(startIndex, POC.MIDDLE_POC);
         }
-        result.intersectPoc(endIndex, POC.END_POC);
+        result.setPocByIndex(endIndex, POC.END_POC);
     }
 
     /**
