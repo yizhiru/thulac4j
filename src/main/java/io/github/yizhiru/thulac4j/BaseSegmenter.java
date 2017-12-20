@@ -15,10 +15,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import static io.github.yizhiru.thulac4j.model.ThulacModel.PocMark.POS_B_CHAR;
-import static io.github.yizhiru.thulac4j.model.ThulacModel.PocMark.POS_E_CHAR;
-import static io.github.yizhiru.thulac4j.model.ThulacModel.PocMark.POS_M_CHAR;
-import static io.github.yizhiru.thulac4j.model.ThulacModel.PocMark.POS_S_CHAR;
+import static io.github.yizhiru.thulac4j.model.CwsModel.PocMark.POS_B_CHAR;
+import static io.github.yizhiru.thulac4j.model.CwsModel.PocMark.POS_E_CHAR;
+import static io.github.yizhiru.thulac4j.model.CwsModel.PocMark.POS_M_CHAR;
+import static io.github.yizhiru.thulac4j.model.CwsModel.PocMark.POS_S_CHAR;
 import static io.github.yizhiru.thulac4j.process.Ruler.CleanedResult;
 
 /**
@@ -47,7 +47,7 @@ public abstract class BaseSegmenter<T> {
     protected DATCementer uw;
 
     protected BaseSegmenter(String weightPath, String featurePath) throws IOException {
-        model = CwsModel.loadModel(weightPath, featurePath);
+        model = new CwsModel(weightPath, featurePath);
         previousTrans = setPreviousTrans(model.labelValues);
     }
 
@@ -167,8 +167,8 @@ public abstract class BaseSegmenter<T> {
                 offset = i + 1;
             }
         }
-        model.ns.cement(segItems);
-        model.idiom.cement(segItems);
+        model.nsCementer.cement(segItems);
+        model.idiomCementer.cement(segItems);
         TimeCementer.cement(segItems);
         if (uw != null) {
             uw.cement(segItems);

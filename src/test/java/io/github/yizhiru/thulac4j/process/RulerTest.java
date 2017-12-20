@@ -47,7 +47,10 @@ public class RulerTest {
                 "最右面.再",
                 "内容《》真实、、",
                 "签定《供货协议书》的，",
-                "昨日《上市公司证券发行管理办法》发布"
+                "昨日《上市公司证券发行管理办法》发布",
+                "《21世纪》：",
+                "《探索·发现》栏目",
+                "《麦亚hee》"
         };
         String[] expectedPocString = new String[]{
                 "sm,bs,d,d,es,bm,mm,em,s",
@@ -66,6 +69,9 @@ public class RulerTest {
                 "bs,es,w,w,bs,es,w,w",
                 "bs,es,w,b,m,m,m,e,w,s,w",
                 "bs,es,w,bs,d,d,d,d,d,d,d,d,d,d,es,w,bs,es",
+                "w,b,m,m,e,w,w",
+                "w,b,m,m,m,e,w,bs,es",
+                "w,b,m,m,m,e,w",
         };
 
         for (int i = 0; i < sentences.length; i++) {

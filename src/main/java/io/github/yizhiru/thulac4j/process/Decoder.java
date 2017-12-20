@@ -3,6 +3,8 @@ package io.github.yizhiru.thulac4j.process;
 import io.github.yizhiru.thulac4j.model.CwsModel;
 import io.github.yizhiru.thulac4j.model.POC;
 
+import java.util.List;
+
 /**
  * Viterbi 解码.
  */
@@ -78,10 +80,11 @@ public final class Decoder {
         // DP求解
         for (int i = 0; i < len; i++) {
             int[] labels = model.allowTabular[pocs[i].ordinal()];
-            for (int label : labels) {
+            int label;
+            for (int j = 0; j < labels.length; j++) {
+                label = labels[j];
                 alpha = pathTabular[i][label];
                 if (i == 0) {
-                    alpha.score = INITIAL_SCORE;
                     alpha.preLabel = INITIAL_PREVIOUS_LABEL;
                 } else {
                     int[] preLabels = previousTrans[label];
@@ -90,7 +93,7 @@ public final class Decoder {
                             continue;
                         }
                         int score = pathTabular[i - 1][pre].score
-                                + model.llWeights[pre][label];
+                                + model.llWeights[pre * model.labelSize + label];
                         if (alpha.preLabel == NULL_PREVIOUS_LABEL || score > alpha.score) {
                             alpha.score = score;
                             alpha.preLabel = pre;

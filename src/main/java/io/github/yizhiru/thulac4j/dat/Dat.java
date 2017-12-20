@@ -10,9 +10,7 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
-import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,9 +107,9 @@ public class Dat implements Serializable {
      */
     public static Dat loadDat(InputStream inputStream) throws IOException {
         int[] array = IOUtils.toIntArray(inputStream);
-        int len = array[0];
-        List<Dat.Entry> entries = new ArrayList<>(len / 2);
-        for (int i = 1; i < len; i += 2) {
+        int arrayLen = array[0];
+        List<Dat.Entry> entries = new ArrayList<>(arrayLen / 2);
+        for (int i = 1; i < arrayLen; i += 2) {
             entries.add(new Dat.Entry(array[i], array[i + 1]));
         }
         return new Dat(entries);

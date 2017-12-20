@@ -15,7 +15,7 @@ thulac4j是[THULAC](http://thulac.thunlp.org/)的高效Java 8实现，具有分�
 <dependency>
   <groupId>io.github.yizhiru</groupId>
   <artifactId>thulac4j</artifactId>
-  <version>1.3.1</version>
+  <version>1.3.2</version>
 </dependency>
 ```
 
@@ -35,7 +35,7 @@ List<String> words = seg.segment(sentence);
 // SegPos mode
 SegPos pos = new SegPos("models/model_c_model.bin", "models/model_c_dat.bin");
 List<SegItem> words = pos.segment(sentence);
-// [滔滔/a, 的/u, 流水/n, ，/w, 向着/p, 波士顿湾/ns, 无声/v, 逝去/v]
+nsCementer
 ```
 
 模型数据较大，没有放在jar包与源码。训练模型下载及更多使用说明，请参看[Getting Started](https://github.com/yizhiru/thulac4j/wiki).
