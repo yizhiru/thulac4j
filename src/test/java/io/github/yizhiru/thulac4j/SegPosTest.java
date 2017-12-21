@@ -141,7 +141,7 @@ public class SegPosTest {
         };
 
         SegPos segmenter = new SegPos(SEG_POS_WEIGHTS_PATH, SEG_POS_FEATURES_PATH);
-
+        segmenter.enableTitleWord();
         for (int i = 0; i < SENTENCES.length; i++) {
             String actual = segmenter.segment(SENTENCES[i])
                     .stream()

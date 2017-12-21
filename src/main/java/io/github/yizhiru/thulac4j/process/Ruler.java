@@ -153,7 +153,7 @@ public final class Ruler {
      * @param sentence 待分词句子
      * @return 清洗后String
      */
-    public static CleanedResult ruleClean(String sentence) {
+    public static CleanedResult ruleClean(String sentence, boolean isEnableTileWord) {
         int len = sentence.length();
         char[] raw = sentence.toCharArray();
         CleanedResult result = new CleanedResult(sentence.length());
@@ -179,20 +179,22 @@ public final class Ruler {
             else if (isSinglePunctuation(ch)) {
                 result.intersectPoc(result.getLastIndex(), POC.ES_POC);
                 result.append(ch, POC.PUNCTUATION_POC);
-                // 前书名号
-                if (ch == '《') {
-                    hasTitleBegin = true;
-                    titleBegin = i;
-                }
-                // 后书名号
-                else if (hasTitleBegin && ch == '》') {
-                    if (isPossibleTitle(raw, titleBegin + 1, i - 1)) {
-                        setTitleWordPoc(result,
-                                titleBegin + 1,
-                                i - 1,
-                                result.getLastIndex() - 1);
+                if (isEnableTileWord) {
+                    // 前书名号
+                    if (ch == '《') {
+                        hasTitleBegin = true;
+                        titleBegin = i;
                     }
-                    hasTitleBegin = false;
+                    // 后书名号
+                    else if (hasTitleBegin && ch == '》') {
+                        if (isPossibleTitle(raw, titleBegin + 1, i - 1)) {
+                            setTitleWordPoc(result,
+                                    titleBegin + 1,
+                                    i - 1,
+                                    result.getLastIndex() - 1);
+                        }
+                        hasTitleBegin = false;
+                    }
                 }
                 i++;
                 // 处理后面字符
