@@ -135,7 +135,6 @@ public class SegOnlyTest {
 
     @Test
     public void segment() throws IOException {
-        SegOnly segmenter = new SegOnly(SEG_ONLY_WEIGHTS_PATH, SEG_ONLY_FEATURES_PATH);
         String[] expectedResults = new String[]{
                 "因",
                 "",
@@ -256,6 +255,8 @@ public class SegOnlyTest {
                 "2017-10-13 给 你 发 offer 了 吗 ？ 27日 发 iphone5 了 吗",
         };
 
+        SegOnly segmenter = new SegOnly(SEG_ONLY_WEIGHTS_PATH, SEG_ONLY_FEATURES_PATH);
+        segmenter.enableTitleWord();
         for (int i = 0; i < SENTENCES.length; i++) {
             String actual = segmenter.segment(SENTENCES[i])
                     .stream()

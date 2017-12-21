@@ -8,9 +8,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * 黏结阿拉伯数字与时间量词.
+ */
 public class TimeCementer {
-
-    private static final long serialVersionUID = 3100653784598792044L;
 
     private static final Set<Character> TIME_UNITS = new HashSet<>(Arrays.asList(
             '年', '月', '日', '号', '时', '点', '分', '秒')

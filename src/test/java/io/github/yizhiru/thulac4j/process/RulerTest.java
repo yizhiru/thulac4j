@@ -75,7 +75,7 @@ public class RulerTest {
         };
 
         for (int i = 0; i < sentences.length; i++) {
-            Ruler.CleanedResult cleanedResult = Ruler.ruleClean(sentences[i]);
+            Ruler.CleanedResult cleanedResult = Ruler.ruleClean(sentences[i], true);
             String result = Stream.of(cleanedResult.getSentencePoc())
                     .map(pocStringHashMap::get)
                     .collect(Collectors.joining(","));

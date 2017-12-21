@@ -36,9 +36,9 @@ public abstract class BaseSegmenter<T> {
     protected int[][] previousTrans;
 
     /**
-     * 黏结阿拉伯数字与时间量词.
+     * 是否开启黏结书名号内的词.
      */
-    protected TimeCementer timeCementer;
+    protected boolean isEnableTileWord = false;
 
     /**
      * 自定义词典，可为null
@@ -140,7 +140,7 @@ public abstract class BaseSegmenter<T> {
         if (sentence.length() == 0) {
             return process(segItems);
         }
-        CleanedResult cleanedResult = Ruler.ruleClean(sentence);
+        CleanedResult cleanedResult = Ruler.ruleClean(sentence, isEnableTileWord);
         if (cleanedResult.isEmpty()) {
             return process(segItems);
         }
@@ -174,6 +174,10 @@ public abstract class BaseSegmenter<T> {
             uw.cement(segItems);
         }
         return process(segItems);
+    }
+
+    public void enableTitleWord() {
+        isEnableTileWord = true;
     }
 
     /**
