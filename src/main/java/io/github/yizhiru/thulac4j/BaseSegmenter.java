@@ -19,7 +19,7 @@ import static io.github.yizhiru.thulac4j.model.CwsModel.PocMark.POS_B_CHAR;
 import static io.github.yizhiru.thulac4j.model.CwsModel.PocMark.POS_E_CHAR;
 import static io.github.yizhiru.thulac4j.model.CwsModel.PocMark.POS_M_CHAR;
 import static io.github.yizhiru.thulac4j.model.CwsModel.PocMark.POS_S_CHAR;
-import static io.github.yizhiru.thulac4j.process.Ruler.CleanedResult;
+import static io.github.yizhiru.thulac4j.process.Ruler.CleanedSentence;
 
 /**
  * Base class.
@@ -140,20 +140,20 @@ public abstract class BaseSegmenter<T> {
         if (sentence.length() == 0) {
             return process(segItems);
         }
-        CleanedResult cleanedResult = Ruler.ruleClean(sentence, isEnableTileWord);
-        if (cleanedResult.isEmpty()) {
+        CleanedSentence cleanedSentence = Ruler.ruleClean(sentence, isEnableTileWord);
+        if (cleanedSentence.isEmpty()) {
             return process(segItems);
         }
         // 预先计算特征权重
         int[][] weights = model.evaluateSentenceWeights(
-                cleanedResult.getCleanedSentence());
+                cleanedSentence.getCleanedSentence());
         int[] labels = Decoder.viterbiDecode(
                 model,
-                cleanedResult.getSentencePoc(),
+                cleanedSentence.getSentencePoc(),
                 weights,
                 previousTrans);
 
-        char[] rawSentence = cleanedResult.getRawSentence();
+        char[] rawSentence = cleanedSentence.getRawSentence();
         for (int i = 0, offset = 0; i < rawSentence.length; i++) {
             String label = model.labelValues[labels[i]];
             char pocChar = label.charAt(0);
