@@ -108,8 +108,8 @@ public class CwsModelTest {
         };
 
         for (int i = 0; i < sentences.length; i++) {
-            Ruler.CleanedResult cleanedResult = Ruler.ruleClean(sentences[i], true);
-            char[] chars = cleanedResult.getCleanedSentence();
+            Ruler.CleanedSentence cleanedSentence = Ruler.ruleClean(sentences[i], true);
+            char[] chars = cleanedSentence.getCleanedSentence();
             int[][] weights = cwsModel.evaluateSentenceWeights(chars);
             assertEquals(expectedWeights[i], Arrays.deepToString(weights));
         }
@@ -135,8 +135,8 @@ public class CwsModelTest {
                         "0, 0]",
         };
         for (int i = 0; i < sentences.length; i++) {
-            Ruler.CleanedResult cleanedResult = Ruler.ruleClean(sentences[i], true);
-            char[] chars = cleanedResult.getCleanedSentence();
+            Ruler.CleanedSentence cleanedSentence = Ruler.ruleClean(sentences[i], true);
+            char[] chars = cleanedSentence.getCleanedSentence();
             int[][] weights = cwsModel.evaluateSentenceWeights(chars);
             assertEquals(expected0Weights[i], Arrays.toString(weights[0]));
         }

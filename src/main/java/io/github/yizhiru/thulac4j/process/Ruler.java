@@ -3,8 +3,7 @@ package io.github.yizhiru.thulac4j.process;
 import io.github.yizhiru.thulac4j.common.CharUtils;
 import io.github.yizhiru.thulac4j.model.POC;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 import java.util.function.Predicate;
 
 import static io.github.yizhiru.thulac4j.common.CharUtils.convertHalfWidth;
@@ -22,75 +21,59 @@ public final class Ruler {
     /**
      * 清洗结果类.
      */
-    public static class CleanedResult {
+    public static class CleanedSentence {
+
         /**
-         * 清洗后字符、POC二元组
+         * 句子的原字符串.
          */
-        private List<CharPocTuple> tuples;
+        public char[] raw;
+
+        /**
+         * 清洗后字符串（对应于raw），为半角转全角.
+         */
+        public char[] cleaned;
+
+        /**
+         * 可能POC.
+         */
+        public POC[] pocs;
+
+        /**
+         * 清洗后句子长度.
+         */
+        private int length;
 
         /**
          * 最后一个tuple已提前添加.
          */
         private boolean isAppendAhead;
 
-        public CleanedResult(int initialCapacity) {
-            tuples = new ArrayList<>(initialCapacity);
+        public CleanedSentence(int initialCapacity) {
+            raw = new char[initialCapacity];
+            cleaned = new char[initialCapacity];
+            pocs = new POC[initialCapacity];
+            length = 0;
             isAppendAhead = false;
         }
 
-        private static class CharPocTuple {
-            /**
-             * 句子的原字符.
-             */
-            public char raw;
-
-            /**
-             * 清洗后字符（对应于raw），比如大写转小写、半角转全角.
-             */
-            public char cleaned;
-
-            /**
-             * 可能POC.
-             */
-            public POC poc;
-
-            public CharPocTuple(char raw, char cleaned, POC poc) {
-                this.raw = raw;
-                this.cleaned = cleaned;
-                this.poc = poc;
-            }
-        }
-
-        public int getLastIndex() {
-            return tuples.size() - 1;
+        public int length() {
+            return this.length;
         }
 
         public char[] getRawSentence() {
-            int size = tuples.size();
-            char[] rawSentence = new char[size];
-            for (int i = 0; i < size; i++) {
-                rawSentence[i] = tuples.get(i).raw;
-            }
-            return rawSentence;
+            return Arrays.copyOfRange(raw, 0, length);
         }
 
         public char[] getCleanedSentence() {
-            int size = tuples.size();
-            char[] cleanedSentence = new char[size];
-            for (int i = 0; i < size; i++) {
-                cleanedSentence[i] = tuples.get(i).cleaned;
-            }
-            return cleanedSentence;
+            return Arrays.copyOfRange(cleaned, 0, length);
         }
 
         public POC[] getSentencePoc() {
-            return tuples.stream()
-                    .map(t -> t.poc)
-                    .toArray(POC[]::new);
+            return Arrays.copyOfRange(pocs, 0, length);
         }
 
         public boolean isEmpty() {
-            return tuples.isEmpty();
+            return length == 0;
         }
 
         /**
@@ -100,11 +83,10 @@ public final class Ruler {
          * @param poc   可能POC
          */
         private void intersectPoc(int index, POC poc) {
-            if (index < 0 || index >= tuples.size()) {
+            if (index < 0 || index >= length) {
                 return;
             }
-            CharPocTuple tuple = tuples.get(index);
-            tuple.poc = tuple.poc.intersect(poc);
+            pocs[index] = pocs[index].intersect(poc);
         }
 
         /**
@@ -114,10 +96,10 @@ public final class Ruler {
          * @param poc   POC
          */
         private void setPocByIndex(int index, POC poc) {
-            if (index < 0 || index >= tuples.size()) {
+            if (index < 0 || index >= length) {
                 return;
             }
-            tuples.get(index).poc = poc;
+            pocs[index] = poc;
         }
 
         /**
@@ -128,10 +110,13 @@ public final class Ruler {
          */
         private void append(char ch, POC poc) {
             if (isAppendAhead) {
-                intersectPoc(getLastIndex(), poc);
+                intersectPoc(length - 1, poc);
                 isAppendAhead = false;
             } else {
-                tuples.add(new CharPocTuple(ch, convertHalfWidth(ch), poc));
+                raw[length] = ch;
+                cleaned[length] = convertHalfWidth(ch);
+                pocs[length] = poc;
+                length++;
             }
         }
 
@@ -142,7 +127,10 @@ public final class Ruler {
          * @param poc 可能的POC
          */
         private void appendAhead(char ch, POC poc) {
-            tuples.add(new CharPocTuple(ch, convertHalfWidth(ch), poc));
+            raw[length] = ch;
+            cleaned[length] = convertHalfWidth(ch);
+            pocs[length] = poc;
+            length++;
             isAppendAhead = true;
         }
     }
@@ -153,17 +141,17 @@ public final class Ruler {
      * @param sentence 待分词句子
      * @return 清洗后String
      */
-    public static CleanedResult ruleClean(String sentence, boolean isEnableTileWord) {
+    public static CleanedSentence ruleClean(String sentence, boolean isEnableTileWord) {
         int len = sentence.length();
         char[] raw = sentence.toCharArray();
-        CleanedResult result = new CleanedResult(sentence.length());
+        CleanedSentence cleanedSentence = new CleanedSentence(sentence.length());
         boolean hasTitleBegin = false;
         int titleBegin = 0;
         for (int i = 0; i < len; ) {
             char ch = raw[i];
             // 1. Space or control character
             if (isSkipped(ch)) {
-                result.intersectPoc(result.getLastIndex(), POC.ES_POC);
+                cleanedSentence.intersectPoc(cleanedSentence.length() - 1, POC.ES_POC);
                 for (i++; i < len; i++) {
                     if (!isSkipped(raw[i])) {
                         break;
@@ -171,14 +159,14 @@ public final class Ruler {
                 }
                 // 处理后面字符
                 if (i < len) {
-                    result.appendAhead(raw[i], POC.BS_POC);
+                    cleanedSentence.appendAhead(raw[i], POC.BS_POC);
                 }
             }
 
             // 2. Punctuation
             else if (isSinglePunctuation(ch)) {
-                result.intersectPoc(result.getLastIndex(), POC.ES_POC);
-                result.append(ch, POC.PUNCTUATION_POC);
+                cleanedSentence.intersectPoc(cleanedSentence.length() - 1, POC.ES_POC);
+                cleanedSentence.append(ch, POC.PUNCTUATION_POC);
                 if (isEnableTileWord) {
                     // 前书名号
                     if (ch == '《') {
@@ -188,10 +176,10 @@ public final class Ruler {
                     // 后书名号
                     else if (hasTitleBegin && ch == '》') {
                         if (isPossibleTitle(raw, titleBegin + 1, i - 1)) {
-                            setTitleWordPoc(result,
+                            setTitleWordPoc(cleanedSentence,
                                     titleBegin + 1,
                                     i - 1,
-                                    result.getLastIndex() - 1);
+                                    cleanedSentence.length() - 2);
                         }
                         hasTitleBegin = false;
                     }
@@ -199,14 +187,14 @@ public final class Ruler {
                 i++;
                 // 处理后面字符
                 if (i < len && !isSkipped(raw[i])) {
-                    result.appendAhead(raw[i], POC.BS_POC);
+                    cleanedSentence.appendAhead(raw[i], POC.BS_POC);
                 }
             }
 
             // 3. English or Latin words
             else if (isLetter(ch)) {
                 i = processWord(raw,
-                        result,
+                        cleanedSentence,
                         i,
                         CharUtils::mayBeLetterWord,
                         false);
@@ -215,7 +203,7 @@ public final class Ruler {
             // 4. Numbers
             else if (isDigit(ch)) {
                 i = processWord(raw,
-                        result,
+                        cleanedSentence,
                         i,
                         CharUtils::mayBeNumeral,
                         true);
@@ -223,23 +211,23 @@ public final class Ruler {
 
             // 5. 余下标点
             else if (isRemainPunctuation(ch)) {
-                result.intersectPoc(result.getLastIndex(), POC.ES_POC);
-                result.append(ch, POC.PUNCTUATION_POC);
+                cleanedSentence.intersectPoc(cleanedSentence.length() - 1, POC.ES_POC);
+                cleanedSentence.append(ch, POC.PUNCTUATION_POC);
                 i++;
                 if (i < len && !isSkipped(raw[i])) {
-                    result.appendAhead(raw[i], POC.BS_POC);
+                    cleanedSentence.appendAhead(raw[i], POC.BS_POC);
                 }
             }
 
             // 6. Else
             else {
-                result.append(ch, POC.DEFAULT_POC);
+                cleanedSentence.append(ch, POC.DEFAULT_POC);
                 i++;
             }
         }
-        result.intersectPoc(0, POC.BS_POC);
-        result.intersectPoc(result.getLastIndex(), POC.ES_POC);
-        return result;
+        cleanedSentence.intersectPoc(0, POC.BS_POC);
+        cleanedSentence.intersectPoc(cleanedSentence.length() - 1, POC.ES_POC);
+        return cleanedSentence;
     }
 
     /**
@@ -271,7 +259,7 @@ public final class Ruler {
      * @param endIndex  wordEnd对应在result的index值
      */
     private static void setTitleWordPoc(
-            CleanedResult result,
+            CleanedSentence result,
             int wordStart,
             int wordEnd,
             int endIndex) {
@@ -299,7 +287,7 @@ public final class Ruler {
      */
     private static int processWord(
             char[] sentence,
-            CleanedResult result,
+            CleanedSentence result,
             int wordStart,
             Predicate<Character> condition,
             boolean isNumeral) {
@@ -317,7 +305,7 @@ public final class Ruler {
         }
 
         // 处理前一字符
-        result.intersectPoc(result.getLastIndex(), POC.ES_POC);
+        result.intersectPoc(result.length() - 1, POC.ES_POC);
 
         int len = sentence.length;
         int i = wordStart;

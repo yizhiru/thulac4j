@@ -65,8 +65,8 @@ public final class Decoder {
         // 最优路径对应的label
         int[] bestPath = new int[len];
         int labelSize = model.labelSize;
-        int bestLastScore = Integer.MIN_VALUE;
-        int bestLastLabel = 2;
+        int optimalLastScore = Integer.MIN_VALUE;
+        int optimalLastLabel = 2;
         Alpha alpha;
         // 记录在位置i时类别为y的最优路径
         // [current index][current Label] -> Alpha(score, preLabel)
@@ -99,15 +99,15 @@ public final class Decoder {
                     }
                 }
                 alpha.score += weights[i][label];
-                if (i == len - 1 && bestLastScore < alpha.score) {
-                    bestLastScore = alpha.score;
-                    bestLastLabel = label;
+                if (i == len - 1 && optimalLastScore < alpha.score) {
+                    optimalLastScore = alpha.score;
+                    optimalLastLabel = label;
                 }
             }
         }
         // 尾节点的最优label
-        alpha = pathTabular[len - 1][bestLastLabel];
-        bestPath[len - 1] = bestLastLabel;
+        alpha = pathTabular[len - 1][optimalLastLabel];
+        bestPath[len - 1] = optimalLastLabel;
         // 回溯最优路径，保留label到数组
         for (int i = len - 2; i >= 0; i--) {
             bestPath[i] = alpha.preLabel;
