@@ -48,7 +48,8 @@ public final class DATCementer implements Cementer {
 
     @Override
     public void cement(List<SegItem> segItems) {
-        int index, j;
+        int index;
+        int j;
         for (int i = 0; i < segItems.size(); i++) {
             index = -dat.match(0, segItems.get(i).word);
             if (index <= 0) {
@@ -56,16 +57,18 @@ public final class DATCementer implements Cementer {
             }
             StringBuilder builder = new StringBuilder(segItems.get(i).word);
             for (j = i + 1; j < segItems.size(); j++) {
+                int preIndex = index;
                 index = -dat.match(index, segItems.get(j).word);
                 // 后面的词没有匹配上词典
                 if (index <= 0) {
+                    index = preIndex;
                     break;
                 }
                 builder.append(segItems.get(j).word);
             }
             // 若其后的词匹配上词典，则进行黏词
             String word = builder.toString();
-            if (dat.isWordMatched(word)) {
+            if (dat.isWordMatched(index)) {
                 segItems.set(i, new SegItem(word, pos));
                 for (j = j - 1; j > i; j--) {
                     segItems.remove(j);

@@ -145,12 +145,11 @@ public abstract class BaseSegmenter<T> {
             return process(segItems);
         }
         // 预先计算特征权重
-        int[][] weights = model.evaluateSentenceWeights(
-                cleanedSentence.getCleanedSentence());
+//        int[][] weights = model.evaluateSentenceWeights(
+//                cleanedSentence.getCleanedSentence());
         int[] labels = Decoder.viterbiDecode(
                 model,
-                cleanedSentence.getSentencePoc(),
-                weights,
+                cleanedSentence,
                 previousTrans);
 
         char[] rawSentence = cleanedSentence.getRawSentence();

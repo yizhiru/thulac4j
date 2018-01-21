@@ -17,14 +17,14 @@ public class DATCementerTest {
     public void cement() throws IOException {
         DATCementer cementer = new DATCementer(
                 this.getClass().getResourceAsStream(ModelPaths.NS_BIN_PATH),
-                "nsCementer");
+                "ns");
         List<SegItem> segItems = new ArrayList<>(Arrays.asList(
                 new SegItem("黑", null),
                 new SegItem("龙", "n"),
                 new SegItem("江", "j"))
         );
         cementer.cement(segItems);
-        assertEquals("[黑龙江/nsCementer]", segItems.toString());
+        assertEquals("[黑龙江/ns]", segItems.toString());
 
         cementer = new DATCementer(
                 this.getClass().getResourceAsStream(ModelPaths.IDIOM_BIN_PATH),
