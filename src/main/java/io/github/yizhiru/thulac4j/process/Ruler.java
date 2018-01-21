@@ -12,6 +12,7 @@ import static io.github.yizhiru.thulac4j.common.CharUtils.isLetter;
 import static io.github.yizhiru.thulac4j.common.CharUtils.isRemainPunctuation;
 import static io.github.yizhiru.thulac4j.common.CharUtils.isSinglePunctuation;
 import static io.github.yizhiru.thulac4j.common.CharUtils.isSkipped;
+import static io.github.yizhiru.thulac4j.model.CwsModel.NGramFeature.BOUNDARY;
 
 /**
  * 分词规则集合.
@@ -56,6 +57,11 @@ public final class Ruler {
             isAppendAhead = false;
         }
 
+        /**
+         * 规则清洗后的句子长度.
+         *
+         * @return 清洗后句子长度
+         */
         public int length() {
             return this.length;
         }
@@ -72,8 +78,25 @@ public final class Ruler {
             return Arrays.copyOfRange(pocs, 0, length);
         }
 
+        /**
+         * 规则清洗后的字符串是否为空
+         *
+         * @return 若为空，则为true
+         */
         public boolean isEmpty() {
             return length == 0;
+        }
+
+        /**
+         * 首尾拼接BOUNDARY 字符
+         *
+         * @return 拼接后的字符串
+         */
+        public char[] insertBoundary() {
+            char[] array = new char[length + 4];
+            System.arraycopy(cleaned, 0, array, 2, length);
+            array[0] = array[1] = array[length + 2] = array[length + 3] = BOUNDARY;
+            return array;
         }
 
         /**

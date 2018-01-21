@@ -3,8 +3,6 @@ package io.github.yizhiru.thulac4j.process;
 import io.github.yizhiru.thulac4j.model.CwsModel;
 import io.github.yizhiru.thulac4j.model.POC;
 
-import java.util.List;
-
 /**
  * Viterbi 解码.
  */
@@ -50,21 +48,19 @@ public final class Decoder {
     /**
      * Viterbi算法解码
      *
-     * @param model         训练模型
-     * @param pocs          POC数组
-     * @param weights       特征模板对应的权值加权之和F(y_{t+1}=y,C)
-     * @param previousTrans 前向转移label
+     * @param cwsModel        训练模型
+     * @param cleanedSentence 规则处理后的句子Label 类
+     * @param previousTrans   前向转移label
      * @return 最优路径对应的labels
      */
     public static int[] viterbiDecode(
-            CwsModel model,
-            POC[] pocs,
-            int[][] weights,
+            CwsModel cwsModel,
+            Ruler.CleanedSentence cleanedSentence,
             int[][] previousTrans) {
-        int len = pocs.length;
+        int len = cleanedSentence.length();
         // 最优路径对应的label
         int[] bestPath = new int[len];
-        int labelSize = model.labelSize;
+        int labelSize = cwsModel.labelSize;
         int optimalLastScore = Integer.MIN_VALUE;
         int optimalLastLabel = 2;
         Alpha alpha;
@@ -77,31 +73,41 @@ public final class Decoder {
                 pathTabular[i][j] = new Alpha();
             }
         }
+
+        char[] chars = cleanedSentence.insertBoundary();
+        POC[] pocs = cleanedSentence.getSentencePoc();
+
         // DP求解
         for (int i = 0; i < len; i++) {
-            int[] labels = model.allowTabular[pocs[i].ordinal()];
-            for (int label : labels) {
-                alpha = pathTabular[i][label];
+            int[] labelIndices = cwsModel.allowTabular[pocs[i].ordinal()];
+            int[] weights = cwsModel.evaluateCharWeights(chars[i],
+                    chars[i + 1],
+                    chars[i + 2],
+                    chars[i + 3],
+                    chars[i + 4],
+                    labelIndices);
+            for (int labelIndex : labelIndices) {
+                alpha = pathTabular[i][labelIndex];
                 if (i == 0) {
                     alpha.preLabel = INITIAL_PREVIOUS_LABEL;
                 } else {
-                    int[] preLabels = previousTrans[label];
+                    int[] preLabels = previousTrans[labelIndex];
                     for (int pre : preLabels) {
                         if (pathTabular[i - 1][pre].preLabel == NULL_PREVIOUS_LABEL) {
                             continue;
                         }
                         int score = pathTabular[i - 1][pre].score
-                                + model.llWeights[pre * model.labelSize + label];
+                                + cwsModel.llWeights[pre * cwsModel.labelSize + labelIndex];
                         if (alpha.preLabel == NULL_PREVIOUS_LABEL || score > alpha.score) {
                             alpha.score = score;
                             alpha.preLabel = pre;
                         }
                     }
                 }
-                alpha.score += weights[i][label];
+                alpha.score += weights[labelIndex];
                 if (i == len - 1 && optimalLastScore < alpha.score) {
                     optimalLastScore = alpha.score;
-                    optimalLastLabel = label;
+                    optimalLastLabel = labelIndex;
                 }
             }
         }

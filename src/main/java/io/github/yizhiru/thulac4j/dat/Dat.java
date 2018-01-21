@@ -21,6 +21,8 @@ public class Dat implements Serializable {
 
     private static final long serialVersionUID = 8713857561296693244L;
 
+    public static final int MATCH_FAILURE_INDEX = -1;
+
     /**
      * List of entries.
      */
@@ -138,11 +140,11 @@ public class Dat implements Serializable {
      */
     public int transition(int r, int c) {
         if (r < 0 || r >= entries.size()) {
-            return -1;
+            return MATCH_FAILURE_INDEX;
         }
         int s = entries.get(r).base + c;
         if (s >= entries.size() || entries.get(s).check != r) {
-            return -1;
+            return MATCH_FAILURE_INDEX;
         }
         return s;
     }
@@ -154,13 +156,21 @@ public class Dat implements Serializable {
      * @return 若存在，则为true
      */
     public boolean isWordMatched(String word) {
-        int index = match(word);
-        if (index >= 0) {
+        return isWordMatched(-match(word));
+    }
+
+    /**
+     * 词是否在trie树中
+     *
+     * @param wordMatchedIndex 已匹配上词前缀的index
+     * @return 若存在，则为true
+     */
+    public boolean isWordMatched(int wordMatchedIndex) {
+        if (wordMatchedIndex <= 0) {
             return false;
         }
-        index = -index;
-        int base = entries.get(index).base;
-        return base < entries.size() && entries.get(base).check == index;
+        int base = entries.get(wordMatchedIndex).base;
+        return base < entries.size() && entries.get(base).check == wordMatchedIndex;
     }
 
     /**
@@ -194,7 +204,7 @@ public class Dat implements Serializable {
         int index = startIndex;
         for (int i = 0; i < str.length(); i++) {
             index = transition(index, str.charAt(i));
-            if (index == -1) {
+            if (index == MATCH_FAILURE_INDEX) {
                 return i;
             }
         }

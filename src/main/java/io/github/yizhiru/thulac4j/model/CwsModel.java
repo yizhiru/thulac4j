@@ -13,11 +13,11 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.github.yizhiru.thulac4j.dat.Dat.MATCH_FAILURE_INDEX;
 import static io.github.yizhiru.thulac4j.model.CwsModel.NGramFeature.BIGRAM_FEATURE_1;
 import static io.github.yizhiru.thulac4j.model.CwsModel.NGramFeature.BIGRAM_FEATURE_2;
 import static io.github.yizhiru.thulac4j.model.CwsModel.NGramFeature.BIGRAM_FEATURE_3;
 import static io.github.yizhiru.thulac4j.model.CwsModel.NGramFeature.BIGRAM_FEATURE_4;
-import static io.github.yizhiru.thulac4j.model.CwsModel.NGramFeature.BOUNDARY;
 import static io.github.yizhiru.thulac4j.model.CwsModel.NGramFeature.SPACE;
 import static io.github.yizhiru.thulac4j.model.CwsModel.NGramFeature.UNIGRAM_FEATURE_1;
 import static io.github.yizhiru.thulac4j.model.CwsModel.NGramFeature.UNIGRAM_FEATURE_2;
@@ -292,8 +292,8 @@ public final class CwsModel implements Serializable {
         int index = (int) ch;
         index = featureDat.transition(index, SPACE);
         index = featureDat.transition(index, mark);
-        if (index == -1) {
-            return -1;
+        if (index == MATCH_FAILURE_INDEX) {
+            return MATCH_FAILURE_INDEX;
         }
         return featureDat.get(index).base;
     }
@@ -312,8 +312,8 @@ public final class CwsModel implements Serializable {
         int index = featureDat.transition(index1, index2);
         index = featureDat.transition(index, SPACE);
         index = featureDat.transition(index, mark);
-        if (index == -1) {
-            return -1;
+        if (index == MATCH_FAILURE_INDEX) {
+            return MATCH_FAILURE_INDEX;
         }
         return featureDat.get(index).base;
     }
@@ -321,79 +321,57 @@ public final class CwsModel implements Serializable {
     /**
      * 根据featureDAT的base值，更新特征权重之和数组
      *
-     * @param value label权重之和数组
-     * @param base  featureDAT base值
+     * @param weights      label权重之和数组
+     * @param base         featureDAT base值
+     * @param labelIndices 允许POS 索引值
      */
-    private void addWeights(int[] value, int base) {
+    private void addWeights(int[] weights, int base, int[] labelIndices) {
         int offset = base * labelSize;
-        for (int i = 0; i < labelSize; i++) {
-            value[i] += flWeights[offset + i];
+        for (int i : labelIndices) {
+            weights[i] += flWeights[offset + i];
         }
     }
 
     /**
-     * 根据前后一起的五个字符，计算加权之和数组
+     * 根据前后一起的五个字符，计算加权特征权重之和数组
      *
-     * @param left1  前一字符
-     * @param mid    当前字符
-     * @param right1 后一字符
-     * @param right2 后二字符
+     * @param left2        前二字符
+     * @param left1        前一字符
+     * @param mid          当前字符
+     * @param right1       后一字符
+     * @param right2       后二字符
+     * @param labelIndices 允许label 索引值
      * @return 一维数组，表示当前字符的各label对应的特征权值加权之和
      */
-    private int[] evaluateCharWeights(
+    public int[] evaluateCharWeights(
             char left2,
             char left1,
             char mid,
             char right1,
-            char right2) {
+            char right2,
+            int[] labelIndices) {
         int[] weights = new int[labelSize];
         int base;
-        if ((base = findUnigramFeat(mid, UNIGRAM_FEATURE_1)) != -1) {
-            addWeights(weights, base);
+        if ((base = findUnigramFeat(mid, UNIGRAM_FEATURE_1)) != MATCH_FAILURE_INDEX) {
+            addWeights(weights, base, labelIndices);
         }
-        if ((base = findUnigramFeat(left1, UNIGRAM_FEATURE_2)) != -1) {
-            addWeights(weights, base);
+        if ((base = findUnigramFeat(left1, UNIGRAM_FEATURE_2)) != MATCH_FAILURE_INDEX) {
+            addWeights(weights, base, labelIndices);
         }
-        if ((base = findUnigramFeat(right1, UNIGRAM_FEATURE_3)) != -1) {
-            addWeights(weights, base);
+        if ((base = findUnigramFeat(right1, UNIGRAM_FEATURE_3)) != MATCH_FAILURE_INDEX) {
+            addWeights(weights, base, labelIndices);
         }
-        if ((base = findBigramFeat(left1, mid, BIGRAM_FEATURE_1)) != -1) {
-            addWeights(weights, base);
+        if ((base = findBigramFeat(left1, mid, BIGRAM_FEATURE_1)) != MATCH_FAILURE_INDEX) {
+            addWeights(weights, base, labelIndices);
         }
-        if ((base = findBigramFeat(mid, right1, BIGRAM_FEATURE_2)) != -1) {
-            addWeights(weights, base);
+        if ((base = findBigramFeat(mid, right1, BIGRAM_FEATURE_2)) != MATCH_FAILURE_INDEX) {
+            addWeights(weights, base, labelIndices);
         }
-        if ((base = findBigramFeat(left2, left1, BIGRAM_FEATURE_3)) != -1) {
-            addWeights(weights, base);
+        if ((base = findBigramFeat(left2, left1, BIGRAM_FEATURE_3)) != MATCH_FAILURE_INDEX) {
+            addWeights(weights, base, labelIndices);
         }
-        if ((base = findBigramFeat(right1, right2, BIGRAM_FEATURE_4)) != -1) {
-            addWeights(weights, base);
-        }
-
-        return weights;
-    }
-
-    /**
-     * 计算句子特征权重之和二维数组，其中行数为句子长度，列数为label数；
-     * 每一行表示当前字符的特征权重之和数组
-     *
-     * @param sentence 句子字符串
-     * @return 二维数组
-     */
-    public int[][] evaluateSentenceWeights(char[] sentence) {
-        int len = sentence.length;
-        int[][] weights = new int[len][];
-        char[] chs = new char[len + 4];
-        System.arraycopy(sentence, 0, chs, 2, len);
-        // 首尾拼接BOUNDARY 字符
-        chs[0] = chs[1] = chs[chs.length - 2] = chs[chs.length - 1] = BOUNDARY;
-        for (int i = 0; i < len; i++) {
-            weights[i] = evaluateCharWeights(
-                    chs[i],
-                    chs[i + 1],
-                    chs[i + 2],
-                    chs[i + 3],
-                    chs[i + 4]);
+        if ((base = findBigramFeat(right1, right2, BIGRAM_FEATURE_4)) != MATCH_FAILURE_INDEX) {
+            addWeights(weights, base, labelIndices);
         }
         return weights;
     }
