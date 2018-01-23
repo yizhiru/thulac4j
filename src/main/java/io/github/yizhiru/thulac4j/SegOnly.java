@@ -16,7 +16,7 @@ public final class SegOnly extends BaseSegmenter<String> {
     }
 
     @Override
-    public List<String> process(List<SegItem> segItems) {
+    List<String> process(List<SegItem> segItems) {
         return segItems.stream()
                 .map(item -> (item.word))
                 .collect(Collectors.toList());
