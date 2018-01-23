@@ -144,9 +144,7 @@ public abstract class BaseSegmenter<T> {
         if (cleanedSentence.isEmpty()) {
             return process(segItems);
         }
-        // 预先计算特征权重
-//        int[][] weights = model.evaluateSentenceWeights(
-//                cleanedSentence.getCleanedSentence());
+
         int[] labels = Decoder.viterbiDecode(
                 model,
                 cleanedSentence,
