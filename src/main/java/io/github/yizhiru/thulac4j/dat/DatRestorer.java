@@ -14,7 +14,7 @@ public final class DatRestorer {
         String word;
         LinkedList<String> list = new LinkedList<>();
         for (int i = 0; i < dat.size(); i++) {
-            if (dat.get(i).check >= 0) {
+            if (dat.getCheckByIndex(i) >= 0) {
                 word = restoreWord(dat, i);
                 if (dat.isWordMatched(word)) {
                     list.add(word);
@@ -32,15 +32,16 @@ public final class DatRestorer {
      * @return word
      */
     private static String restoreWord(Dat dat, int index) {
-        int r, s = index;
+        int pre;
+        int cur = index;
         StringBuilder sb = new StringBuilder();
-        while (s > 0 && s < dat.size()) {
-            r = dat.get(s).check;
-            if (r == s || dat.get(r).base >= s) {
+        while (cur > 0 && cur < dat.size()) {
+            pre = dat.getCheckByIndex(cur);
+            if (pre == cur || dat.getBaseByIndex(pre) >= cur) {
                 break;
             }
-            sb.insert(0, (char) (s - dat.get(r).base));
-            s = r;
+            sb.insert(0, (char) (cur - dat.getBaseByIndex(pre)));
+            cur = pre;
         }
         return sb.toString();
     }

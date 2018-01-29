@@ -11,8 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 /**
  * Double Array Trie (DAT).
@@ -24,50 +23,81 @@ public class Dat implements Serializable {
     public static final int MATCH_FAILURE_INDEX = -1;
 
     /**
-     * List of entries.
+     * Base array.
      */
-    protected List<Entry> entries;
+    protected int[] baseArr;
 
     /**
-     * An entry contains base and check value.
+     * Check array.
      */
-    public static class Entry implements Serializable {
+    protected int[] checkArr;
 
-        private static final long serialVersionUID = 8485610155599791207L;
 
-        public int base;
-        public int check;
+    /**
+     * The size of DAT.
+     */
+    protected int size;
 
-        public Entry(int base, int check) {
-            this.base = base;
-            this.check = check;
+    public Dat(int[] baseArr, int[] checkArr) {
+        if (baseArr.length != checkArr.length) {
+            throw new IllegalArgumentException(String.format("The length of base array %s != the length of check " +
+                    "array %s", baseArr.length, checkArr.length));
         }
-
-        @Override
-        public String toString() {
-            return base + " " + check;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            Entry entry = (Entry) o;
-            return base == entry.base && check == entry.check;
-        }
+        this.baseArr = baseArr;
+        this.checkArr = checkArr;
+        size = baseArr.length;
     }
 
-    public Dat(List<Entry> entries) {
-        this.entries = entries;
+    public Dat(int[] baseArr, int[] checkArr, int size) {
+        this.baseArr = Arrays.copyOf(baseArr, size);
+        this.checkArr = Arrays.copyOf(checkArr, size);
+        this.size = size;
     }
 
     public Dat() {
-        this.entries = new ArrayList<>();
+    }
+
+    /**
+     * The size of DAT.
+     *
+     * @return size
+     */
+    public int size() {
+        return size;
+    }
+
+    /**
+     * Ensure the index is not out bound.
+     *
+     * @param index the index value.
+     */
+    private void ensureValidIndex(int index) {
+        if (index >= size()) {
+            throw new RuntimeException(String.format("The index %s is out of bound [%s].",
+                    index, size()));
+        }
+    }
+
+    /**
+     * Get base value by its index.
+     *
+     * @param index the index of base array.
+     * @return the base value.
+     */
+    public int getBaseByIndex(int index) {
+        ensureValidIndex(index);
+        return baseArr[index];
+    }
+
+    /**
+     * Get check value by its index.
+     *
+     * @param index the index of check array.
+     * @return the check value.
+     */
+    public int getCheckByIndex(int index) {
+        ensureValidIndex(index);
+        return checkArr[index];
     }
 
     /**
@@ -76,17 +106,13 @@ public class Dat implements Serializable {
      * @param path 文件路径
      */
     public void serialize(String path) throws IOException {
-        int[] arr = new int[2 * entries.size()];
-        for (int i = 0; i < entries.size(); i++) {
-            arr[2 * i] = entries.get(i).base;
-            arr[2 * i + 1] = entries.get(i).check;
-        }
         FileChannel channel = new FileOutputStream(path).getChannel();
-        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4 * (arr.length + 1));
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4 * (2 * size() + 1));
         IntBuffer intBuffer = byteBuffer.order(ByteOrder.LITTLE_ENDIAN)
                 .asIntBuffer();
-        intBuffer.put(arr.length);
-        intBuffer.put(arr);
+        intBuffer.put(size());
+        intBuffer.put(baseArr);
+        intBuffer.put(checkArr);
         channel.write(byteBuffer);
         channel.close();
     }
@@ -110,43 +136,27 @@ public class Dat implements Serializable {
     public static Dat loadDat(InputStream inputStream) throws IOException {
         int[] array = IOUtils.toIntArray(inputStream);
         int arrayLen = array[0];
-        List<Dat.Entry> entries = new ArrayList<>(arrayLen / 2);
-        for (int i = 1; i < arrayLen; i += 2) {
-            entries.add(new Dat.Entry(array[i], array[i + 1]));
-        }
-        return new Dat(entries);
-    }
-
-    /**
-     * The size of DAT.
-     */
-    public int size() {
-        return entries.size();
-    }
-
-    /**
-     * Get the entry by index.
-     */
-    public Entry get(int index) {
-        return entries.get(index);
+        int[] baseArr = Arrays.copyOfRange(array, 1, arrayLen + 1);
+        int[] checkArr = Arrays.copyOfRange(array, arrayLen + 1, 2 * arrayLen + 1);
+        return new Dat(baseArr, checkArr);
     }
 
     /**
      * 按照DAT的转移方程进行转移: ROOT_PATH[r] + c = s, check[s] = r
      *
-     * @param r 前缀在DAT中的index
-     * @param c 转移字符的index
+     * @param prefixIndex 前缀在DAT中的index
+     * @param charValue   转移字符的int值
      * @return 在DAT中的index，若不在则为-1
      */
-    public int transition(int r, int c) {
-        if (r < 0 || r >= entries.size()) {
+    public int transition(int prefixIndex, int charValue) {
+        if (prefixIndex < 0 || prefixIndex >= size()) {
             return MATCH_FAILURE_INDEX;
         }
-        int s = entries.get(r).base + c;
-        if (s >= entries.size() || entries.get(s).check != r) {
+        int index = baseArr[prefixIndex] + charValue;
+        if (index >= size() || checkArr[index] != prefixIndex) {
             return MATCH_FAILURE_INDEX;
         }
-        return s;
+        return index;
     }
 
     /**
@@ -162,15 +172,15 @@ public class Dat implements Serializable {
     /**
      * 词是否在trie树中
      *
-     * @param wordMatchedIndex 已匹配上词前缀的index
+     * @param matchedIndex 已匹配上词前缀的index
      * @return 若存在，则为true
      */
-    public boolean isWordMatched(int wordMatchedIndex) {
-        if (wordMatchedIndex <= 0) {
+    public boolean isWordMatched(int matchedIndex) {
+        if (matchedIndex <= 0) {
             return false;
         }
-        int base = entries.get(wordMatchedIndex).base;
-        return base < entries.size() && entries.get(base).check == wordMatchedIndex;
+        int base = baseArr[matchedIndex];
+        return base < size() && checkArr[base] == matchedIndex;
     }
 
     /**

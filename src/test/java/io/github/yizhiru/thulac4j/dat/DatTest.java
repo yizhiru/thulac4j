@@ -46,7 +46,8 @@ public class DatTest {
 
             assertTrue(expect.size() == actual.size());
             for (int j = 0; j < expect.size(); j++) {
-                assertEquals(expect.get(j), actual.get(j));
+                assertEquals(expect.getBaseByIndex(j), actual.getBaseByIndex(j));
+                assertEquals(expect.getCheckByIndex(j), actual.getCheckByIndex(j));
             }
         }
     }

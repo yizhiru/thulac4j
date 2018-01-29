@@ -5,8 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,11 +16,22 @@ import java.util.stream.Collectors;
 public final class DatMaker {
 
     private static class Builder extends Dat {
+
+        private static final long serialVersionUID = 1675990036852836829L;
+
+        /**
+         * 标记可用的base index值.
+         */
         private int available;
 
+        /**
+         * Initial value.
+         */
+        private static final int INITIAL_VALUE = -1;
+
         public Builder() {
-            entries = new ArrayList<>(
-                    Collections.singletonList(new Dat.Entry(0, -1)));
+            baseArr = new int[]{0};
+            checkArr = new int[]{INITIAL_VALUE};
             available = 0;
         }
 
@@ -29,19 +39,24 @@ public final class DatMaker {
          * Expand two size.
          */
         private void expand() {
-            int oldSize = entries.size();
-            for (int i = 0; i < oldSize; i++) {
-                entries.add(new Dat.Entry(-1, -1));
+            int oldCapacity = baseArr.length;
+            int newCapacity = oldCapacity << 1;
+            baseArr = Arrays.copyOf(baseArr, newCapacity);
+            checkArr = Arrays.copyOf(checkArr, newCapacity);
+            for (int i = oldCapacity; i < newCapacity; i++) {
+                baseArr[i] = INITIAL_VALUE;
+                checkArr[i] = INITIAL_VALUE;
             }
+            size = newCapacity;
         }
 
         /**
-         * Remove useless entry.
+         * Remove useless base and check.
          */
         private void shrink() {
-            for (int i = entries.size() - 1; i >= 0; i--) {
-                if (entries.get(i).check == -1) {
-                    entries.remove(i);
+            for (int i = checkArr.length - 1; i >= 0; i--) {
+                if (checkArr[i] == INITIAL_VALUE) {
+                    size--;
                 } else {
                     break;
                 }
@@ -57,23 +72,23 @@ public final class DatMaker {
         private int findBaseIndex(List<Integer> children) {
             int cSize = children.size();
             for (int bi = available; ; bi++) {
-                if (bi == entries.size()) {
+                if (bi == size()) {
                     expand();
                 }
                 if (cSize > 0) {
-                    while (bi + children.get(cSize - 1) >= entries.size()) {
+                    while (bi + children.get(cSize - 1) >= size()) {
                         expand();
                     }
                 }
                 // baseIndex应满足条件：
                 // 1. 未被使用
                 // 2. 满足所有children跳转到的node也未被使用
-                if (entries.get(bi).check >= 0) {
+                if (checkArr[bi] >= 0) {
                     continue;
                 }
                 boolean isValid = true;
                 for (Integer c : children) {
-                    if (entries.get(bi + c).check >= 0) {
+                    if (checkArr[bi + c] >= 0) {
                         isValid = false;
                         break;
                     }
@@ -93,14 +108,14 @@ public final class DatMaker {
          */
         private void insert(int preIndex, List<Integer> children, boolean isWord) {
             int bi = findBaseIndex(children);
-            entries.get(preIndex).base = bi;
+            baseArr[preIndex] = bi;
             if (isWord) {
-                entries.get(bi).check = preIndex;
+                checkArr[bi] = preIndex;
                 available = bi + 1;
             }
             for (int c : children) {
-                entries.get(bi + c).base = 0;
-                entries.get(bi + c).check = preIndex;
+                baseArr[bi + c] = 0;
+                checkArr[bi + c] = preIndex;
             }
         }
 
@@ -112,7 +127,9 @@ public final class DatMaker {
          * @param prefix  前缀
          * @return 后一字符集合
          */
-        private List<Integer> genChildren(List<String> lexicon, int start, String prefix) {
+        private List<Integer> generateChildren(List<String> lexicon,
+                                               int start,
+                                               String prefix) {
             List<Integer> children = new LinkedList<>();
             int preLen = prefix.length();
             for (int i = start; i < lexicon.size(); i++) {
@@ -145,14 +162,14 @@ public final class DatMaker {
                 for (int j = matched; j <= word.length(); j++) {
                     prefix = word.substring(0, j);
                     preIndex = -match(prefix);
-                    List<Integer> children = genChildren(lexicon, i, prefix);
+                    List<Integer> children = generateChildren(lexicon, i, prefix);
                     insert(preIndex, children, j == word.length());
                 }
                 matched = -match(word);
-                entries.get(entries.get(matched).base).base = i;
+                baseArr[baseArr[matched]] = i;
             }
             shrink();
-            return new Dat(entries);
+            return new Dat(baseArr, checkArr, size);
         }
     }
 

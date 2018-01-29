@@ -109,11 +109,13 @@ public final class CwsModel implements Serializable {
                 .asIntBuffer();
         intBuffer.get(featureArray);
         // convert feature DAT
-        List<Dat.Entry> entries = new ArrayList<>(arrayLen / 2);
-        for (int i = 0; i < arrayLen; i += 2) {
-            entries.add(new Dat.Entry(featureArray[i], featureArray[i + 1]));
+        int[] baseArr = new int[arrayLen / 2];
+        int[] checkArr = new int[arrayLen / 2];
+        for (int i = 0; i < arrayLen / 2; i++) {
+            baseArr[i] = featureArray[2 * i];
+            checkArr[i] = featureArray[2 * i + 1];
         }
-        featureDat = new Dat(entries);
+        featureDat = new Dat(baseArr, checkArr);
 
         // Load label file
         String labelPath;
@@ -295,7 +297,7 @@ public final class CwsModel implements Serializable {
         if (index == MATCH_FAILURE_INDEX) {
             return MATCH_FAILURE_INDEX;
         }
-        return featureDat.get(index).base;
+        return featureDat.getBaseByIndex(index);
     }
 
     /**
@@ -315,7 +317,7 @@ public final class CwsModel implements Serializable {
         if (index == MATCH_FAILURE_INDEX) {
             return MATCH_FAILURE_INDEX;
         }
-        return featureDat.get(index).base;
+        return featureDat.getBaseByIndex(index);
     }
 
     /**
