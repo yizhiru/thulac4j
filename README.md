@@ -15,7 +15,7 @@ thulac4j是[THULAC](http://thulac.thunlp.org/)的高效Java 8实现，具有分�
 <dependency>
   <groupId>io.github.yizhiru</groupId>
   <artifactId>thulac4j</artifactId>
-  <version>2.0.0</version>
+  <version>2.0.1</version>
 </dependency>
 ```
 
@@ -41,6 +41,6 @@ List<SegItem> words = pos.segment(sentence);
 模型数据较大，没有放在jar包与源码。训练模型下载及更多使用说明，请参看[Wiki](https://github.com/yizhiru/thulac4j/wiki).
 
 
-最后感谢THUNLP实验室！感谢无私地开源THULAC！
+最后感谢THUNLP实验室！
 
 

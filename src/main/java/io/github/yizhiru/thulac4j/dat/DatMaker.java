@@ -22,7 +22,7 @@ public final class DatMaker {
         /**
          * 标记可用的base index值.
          */
-        private int available;
+        private int availableBaseIndex;
 
         /**
          * Initial value.
@@ -32,21 +32,21 @@ public final class DatMaker {
         public Builder() {
             baseArr = new int[]{0};
             checkArr = new int[]{INITIAL_VALUE};
-            available = 0;
+            size = 1;
+            availableBaseIndex = 0;
         }
 
         /**
          * Expand two size.
          */
         private void expand() {
-            int oldCapacity = baseArr.length;
+            int oldCapacity = size;
             int newCapacity = oldCapacity << 1;
             baseArr = Arrays.copyOf(baseArr, newCapacity);
+            Arrays.fill(baseArr, oldCapacity, newCapacity, INITIAL_VALUE);
             checkArr = Arrays.copyOf(checkArr, newCapacity);
-            for (int i = oldCapacity; i < newCapacity; i++) {
-                baseArr[i] = INITIAL_VALUE;
-                checkArr[i] = INITIAL_VALUE;
-            }
+            Arrays.fill(checkArr, oldCapacity, newCapacity, INITIAL_VALUE);
+
             size = newCapacity;
         }
 
@@ -71,7 +71,7 @@ public final class DatMaker {
          */
         private int findBaseIndex(List<Integer> children) {
             int cSize = children.size();
-            for (int bi = available; ; bi++) {
+            for (int bi = availableBaseIndex; ; bi++) {
                 if (bi == size()) {
                     expand();
                 }
@@ -111,7 +111,7 @@ public final class DatMaker {
             baseArr[preIndex] = bi;
             if (isWord) {
                 checkArr[bi] = preIndex;
-                available = bi + 1;
+                availableBaseIndex = bi + 1;
             }
             for (int c : children) {
                 baseArr[bi + c] = 0;
