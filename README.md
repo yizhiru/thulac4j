@@ -15,26 +15,20 @@ thulac4j是[THULAC](http://thulac.thunlp.org/)的高效Java 8实现，具有分�
 <dependency>
   <groupId>io.github.yizhiru</groupId>
   <artifactId>thulac4j</artifactId>
-  <version>2.0.1</version>
+  <version>3.0.0</version>
 </dependency>
 ```
 
-thulac4j支持两种分词模式：
-
-1. SegOnly模式，只分词没有词性标注；
-2. SegPos模式，分词兼有词性标注。
+thulac4j支持中文分词与词性标注，使用实例如下：
 
 
 ```java
-// SegOnly mode
 String sentence = "滔滔的流水，向着波士顿湾无声逝去";
-SegOnly seg = new SegOnly("models/cws_model.bin", "models/cws_dat.bin");
-List<String> words = seg.segment(sentence);
+List<String> words = Segmenter.segment(sentence);
 // [滔滔, 的, 流水, ，, 向着, 波士顿湾, 无声, 逝去]
 
-// SegPos mode
-SegPos pos = new SegPos("models/model_c_model.bin", "models/model_c_dat.bin");
-List<SegItem> words = pos.segment(sentence);
+POSTagger pos = new POSTagger("models/model_c_model.bin", "models/model_c_dat.bin");
+List<SegItem> words = pos.tagging(sentence);
 // [滔滔/a, 的/u, 流水/n, ，/w, 向着/p, 波士顿湾/ns, 无声/v, 逝去/v]
 ```
 
