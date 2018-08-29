@@ -1,9 +1,14 @@
-package io.github.yizhiru.thulac4j.common;
+package io.github.yizhiru.thulac4j.util;
 
 /**
  * 模型文件路径名
  */
 public final class ModelPaths {
+
+    /**
+     * 核心字符类型词典
+     */
+    public static final String CORE_CHAR_PATH = "/dicts/core_char.dict";
 
     /**
      * 地名词典

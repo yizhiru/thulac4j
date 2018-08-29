@@ -1,8 +1,8 @@
 package io.github.yizhiru.thulac4j.perceptron;
 
-import io.github.yizhiru.thulac4j.process.AnnotationRuler;
+import io.github.yizhiru.thulac4j.process.RuleAnnotator;
 import io.github.yizhiru.thulac4j.term.POC;
-import io.github.yizhiru.thulac4j.term.ResultTerms;
+import io.github.yizhiru.thulac4j.term.AnnotatedTerms;
 import org.junit.Test;
 
 import java.io.FileInputStream;
@@ -116,13 +116,13 @@ public class StructuredPerceptronModelTest {
         };
 
         for (int i = 0; i < sentences.length; i++) {
-            ResultTerms resultTerms = AnnotationRuler.annotate(sentences[i], true);
-            char[] chars = resultTerms.appendBoundaryAround();
+            AnnotatedTerms annotatedTerms = RuleAnnotator.annotate(sentences[i], true);
+            char[] chars = annotatedTerms.appendBoundaryAround();
 
-            POC[] pocs = resultTerms.getSentencePoc();
+            POC[] pocs = annotatedTerms.getPocs();
 
-            int[][] weights = new int[resultTerms.length()][];
-            for (int j = 0; j < resultTerms.length(); j++) {
+            int[][] weights = new int[annotatedTerms.getAnnotatedLength()][];
+            for (int j = 0; j < annotatedTerms.getAnnotatedLength(); j++) {
                 int[] labelIndices = SPModel.allowTabular[pocs[j].ordinal()];
                 weights[j] = SPModel.evaluateCharWeights(
                         chars[j],
@@ -156,10 +156,10 @@ public class StructuredPerceptronModelTest {
                         "13543, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]",
         };
         for (int i = 0; i < sentences.length; i++) {
-            ResultTerms resultTerms = AnnotationRuler.annotate(sentences[i], true);
-            char[] chars = resultTerms.appendBoundaryAround();
+            AnnotatedTerms annotatedTerms = RuleAnnotator.annotate(sentences[i], true);
+            char[] chars = annotatedTerms.appendBoundaryAround();
 
-            POC[] pocs = resultTerms.getSentencePoc();
+            POC[] pocs = annotatedTerms.getPocs();
             int[] labelIndices = SPModel.allowTabular[pocs[0].ordinal()];
             int[] weights = SPModel.evaluateCharWeights(
                     chars[0],

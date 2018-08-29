@@ -1,7 +1,7 @@
 package io.github.yizhiru.thulac4j.perceptron;
 
 import io.github.yizhiru.thulac4j.term.POC;
-import io.github.yizhiru.thulac4j.term.ResultTerms;
+import io.github.yizhiru.thulac4j.term.AnnotatedTerms;
 
 
 public final class StructuredPerceptronClassifier {
@@ -57,16 +57,16 @@ public final class StructuredPerceptronClassifier {
     }
 
     /**
-     * Viterbi算法解码
+     * 结构感知器分类，采用Viterbi算法解码
      *
-     * @param resultTerms 规则处理后的句子Label 类
-     * @param previousTrans   前向转移label
-     * @return 最优路径对应的labels
+     * @param annotatedTerms     规则处理后的句子Label 类
+     * @param previousTransition 前向转移label
+     * @return 最优路径对应的label索引值
      */
-    public int[] viterbiDecode(
-            ResultTerms resultTerms,
-            int[][] previousTrans) {
-        int len = resultTerms.length();
+    public int[] classify(
+            AnnotatedTerms annotatedTerms,
+            int[][] previousTransition) {
+        int len = annotatedTerms.getAnnotatedLength();
         // 最优路径对应的label
         int[] bestPath = new int[len];
         int labelSize = model.labelSize;
@@ -83,8 +83,8 @@ public final class StructuredPerceptronClassifier {
             }
         }
 
-        char[] chars = resultTerms.appendBoundaryAround();
-        POC[] pocs = resultTerms.getSentencePoc();
+        char[] chars = annotatedTerms.appendBoundaryAround();
+        POC[] pocs = annotatedTerms.getPocs();
 
         // DP求解
         for (int i = 0; i < len; i++) {
@@ -101,7 +101,7 @@ public final class StructuredPerceptronClassifier {
                 if (i == 0) {
                     node.previousLabel = INITIAL_PREVIOUS_LABEL;
                 } else {
-                    int[] preLabels = previousTrans[labelIndex];
+                    int[] preLabels = previousTransition[labelIndex];
                     for (int pre : preLabels) {
                         if (pathTabular[i - 1][pre].previousLabel == NULL_PREVIOUS_LABEL) {
                             continue;

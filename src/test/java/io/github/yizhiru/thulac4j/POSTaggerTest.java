@@ -1,6 +1,6 @@
 package io.github.yizhiru.thulac4j;
 
-import io.github.yizhiru.thulac4j.term.SegItem;
+import io.github.yizhiru.thulac4j.term.TokenItem;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -20,7 +20,7 @@ public class POSTaggerTest {
                 "因/p",
                 "",
                 "",
-                "UTF-8/x",
+                "UTF/x -/w 8/m",
                 "iphone5/x",
                 "鲜芋仙/nz 3/m",
                 "枪杆子/n 中/f 出/v 政权/n",
@@ -87,7 +87,7 @@ public class POSTaggerTest {
                 "孙君意/np",
                 "外交部/ni 发言人/n 马朝旭/np",
                 "领导人/n 会议/n 和/c 第四/m 届/q 东亚/ns 峰会/n",
-                "在/p 过去/t 的/u 这/r 五/m 年/q",
+                "在/p 过去/t 的/u 这/r 五年/t",
                 "还/d 需要/v 很/d 长/a 的/u 路/n 要/v 走/v",
                 "60/m 周年/q 首都/n 阅兵/n",
                 "你好/id 人们/n 审美/v 的/u 观点/n 是/v 不同/a 的/u",
@@ -145,7 +145,7 @@ public class POSTaggerTest {
         for (int i = 0; i < SENTENCES.length; i++) {
             String actual = posTagger.tagging(SENTENCES[i])
                     .stream()
-                    .map(SegItem::toString)
+                    .map(TokenItem::toString)
                     .collect(Collectors.joining(" "));
             assertEquals(expectedResults[i], actual);
         }

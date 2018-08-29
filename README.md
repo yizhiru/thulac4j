@@ -15,11 +15,11 @@ thulac4j是[THULAC](http://thulac.thunlp.org/)的高效Java 8实现，具有分�
 <dependency>
   <groupId>io.github.yizhiru</groupId>
   <artifactId>thulac4j</artifactId>
-  <version>3.0.0</version>
+  <version>3.1.0</version>
 </dependency>
 ```
 
-thulac4j支持中文分词与词性标注，使用实例如下：
+thulac4j支持中文分词与词性标注，使用示例如下：
 
 
 ```java

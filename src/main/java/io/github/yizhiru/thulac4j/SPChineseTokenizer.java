@@ -1,14 +1,16 @@
 package io.github.yizhiru.thulac4j;
 
-import io.github.yizhiru.thulac4j.common.ModelPaths;
+import io.github.yizhiru.thulac4j.common.DoubleArrayTrie;
+import io.github.yizhiru.thulac4j.util.ModelPaths;
 import io.github.yizhiru.thulac4j.common.Nullable;
 import io.github.yizhiru.thulac4j.perceptron.StructuredPerceptronClassifier;
 import io.github.yizhiru.thulac4j.perceptron.StructuredPerceptronModel;
-import io.github.yizhiru.thulac4j.process.AnnotationRuler;
-import io.github.yizhiru.thulac4j.process.DictCementer;
-import io.github.yizhiru.thulac4j.process.WordCementer;
-import io.github.yizhiru.thulac4j.term.ResultTerms;
-import io.github.yizhiru.thulac4j.term.SegItem;
+import io.github.yizhiru.thulac4j.process.RuleAnnotator;
+import io.github.yizhiru.thulac4j.process.LexiconCementer;
+import io.github.yizhiru.thulac4j.process.SpecifiedWordCementer;
+import io.github.yizhiru.thulac4j.term.AnnotatedTerms;
+import io.github.yizhiru.thulac4j.term.TokenItem;
+import io.github.yizhiru.thulac4j.util.ChineseUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +20,7 @@ import java.util.List;
 
 import static io.github.yizhiru.thulac4j.perceptron.StructuredPerceptronModel.PocMark.*;
 
-public final class SPChineseTokenizer {
+public class SPChineseTokenizer {
 
     /**
      * 结构感知器模型
@@ -33,31 +35,45 @@ public final class SPChineseTokenizer {
     /**
      * 地名 ns 词典黏结.
      */
-    public final DictCementer nsCementer;
+    public final LexiconCementer nsCementer;
 
     /**
      * 习语 idiom 词典黏结.
      */
-    public final DictCementer idiomCementer;
-
-    /**
-     * 是否开启黏结书名号内的词.
-     */
-    protected boolean isEnableTileWord = false;
+    public final LexiconCementer idiomCementer;
 
     /**
      * 自定义词典，可为null
      */
     @Nullable
-    protected DictCementer uwCementer = null;
+    protected LexiconCementer uwCementer = null;
+
+    private static final class Config {
+
+        /**
+         * 是否开启黏结书名号内的词.
+         */
+        private static boolean isEnableTileWord = false;
+
+        /**
+         * 是否开启停用词过滤
+         */
+        private static boolean isEnableFilterStopWords = false;
+
+        /**
+         * 是否开启转简体中文
+         */
+        private static boolean isEnableConvertToSimplifiedCHN = false;
+
+    }
 
     SPChineseTokenizer(InputStream weightInput, InputStream featureInput, InputStream labelInput) {
         try {
             this.classifier = new StructuredPerceptronClassifier(
                     new StructuredPerceptronModel(weightInput, featureInput, labelInput));
-            this.nsCementer = new DictCementer(
+            this.nsCementer = new LexiconCementer(
                     this.getClass().getResourceAsStream(ModelPaths.NS_BIN_PATH), "ns");
-            this.idiomCementer = new DictCementer(
+            this.idiomCementer = new LexiconCementer(
                     this.getClass().getResourceAsStream(ModelPaths.IDIOM_BIN_PATH), "i");
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -132,46 +148,106 @@ public final class SPChineseTokenizer {
         return previousTrans;
     }
 
-
     /**
      * 序列标注分词
      *
-     * @param sentence 输入句子
+     * @param text 输入文本
      * @return 序列标注结果
      */
-    public List<SegItem> tokenize(String sentence) {
-        List<SegItem> segItems = new ArrayList<>();
-        if (sentence.length() == 0) {
-            return segItems;
-        }
-        ResultTerms resultTerms = AnnotationRuler.annotate(sentence, isEnableTileWord);
-        if (resultTerms.isEmpty()) {
-            return segItems;
+    public List<TokenItem> tokenize(String text) {
+        List<TokenItem> tokenItems = new ArrayList<>();
+        if (text.length() == 0) {
+            return tokenItems;
         }
 
-        int[] labels = classifier.viterbiDecode(resultTerms, previousTrans);
+        AnnotatedTerms annotatedTerms;
+        // 若开启转简体
+        if (Config.isEnableConvertToSimplifiedCHN) {
+            String simplifiedSentence = ChineseUtils.simplified(text);
+            annotatedTerms = RuleAnnotator.annotate(simplifiedSentence, Config.isEnableTileWord);
+        } else {
+            annotatedTerms = RuleAnnotator.annotate(text, Config.isEnableTileWord);
+        }
+        if (annotatedTerms.isEmpty()) {
+            return tokenItems;
+        }
 
-        char[] rawSentence = resultTerms.getRawSentence();
+        int[] labels = classifier.classify(annotatedTerms, previousTrans);
+
+        char[] rawChars = annotatedTerms.getPreAnnotateChars();
         String[] labelValues = classifier.getLabelValues();
-        for (int i = 0, offset = 0; i < rawSentence.length; i++) {
+        for (int i = 0, offset = 0; i < rawChars.length; i++) {
             String label = labelValues[labels[i]];
             char pocChar = label.charAt(0);
             if (pocChar == POS_E_CHAR || pocChar == POS_S_CHAR) {
-                String word = new String(rawSentence, offset, i + 1 - offset);
+                String word = new String(rawChars, offset, i + 1 - offset);
                 if (label.length() >= 2) {
-                    segItems.add(new SegItem(word, label.substring(1)));
+                    tokenItems.add(new TokenItem(word, label.substring(1)));
                 } else {
-                    segItems.add(new SegItem(word, null));
+                    tokenItems.add(new TokenItem(word, null));
                 }
                 offset = i + 1;
             }
         }
-        nsCementer.cement(segItems);
-        idiomCementer.cement(segItems);
-        WordCementer.cementTimeWord(segItems);
-        if (uwCementer != null) {
-            uwCementer.cement(segItems);
+        // 若开启停用词过滤
+        if (Config.isEnableFilterStopWords) {
+            filterStopWords(tokenItems);
         }
-        return segItems;
+        // 地名词典黏结
+        nsCementer.cement(tokenItems);
+        // 习语词典黏结
+        idiomCementer.cement(tokenItems);
+        // 特定词语黏结
+        SpecifiedWordCementer.cementTimeWord(tokenItems);
+        if (uwCementer != null) {
+            uwCementer.cement(tokenItems);
+        }
+        return tokenItems;
+    }
+
+    /**
+     * 添加自定义词典
+     *
+     * @param words 词典
+     */
+    public void addUserWords(List<String> words) {
+        DoubleArrayTrie dat = DoubleArrayTrie.make(words);
+        this.uwCementer = new LexiconCementer(dat, "uw");
+    }
+
+    /**
+     * 开启书名单独成词
+     */
+    public void enableTitleWord() {
+        Config.isEnableTileWord = true;
+    }
+
+    /**
+     * 开启停用词过滤
+     */
+    public void enableFilterStopWords() {
+        Config.isEnableFilterStopWords = true;
+    }
+
+    /**
+     * 开启转简写
+     */
+    public void enableConvertToSimplifiedCHN() {
+        Config.isEnableConvertToSimplifiedCHN = true;
+    }
+
+    /**
+     * 过滤停用词
+     *
+     * @param tokenItems 解码结果
+     */
+    private void filterStopWords(List<TokenItem> tokenItems) {
+        for (int i = 0; i < tokenItems.size(); ) {
+            if (ChineseUtils.isStopWord(tokenItems.get(i).word)) {
+                tokenItems.remove(i);
+            } else {
+                i++;
+            }
+        }
     }
 }

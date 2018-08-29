@@ -1,7 +1,7 @@
 package io.github.yizhiru.thulac4j.process;
 
+import io.github.yizhiru.thulac4j.term.TokenItem;
 import io.github.yizhiru.thulac4j.util.CharUtils;
-import io.github.yizhiru.thulac4j.term.SegItem;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -9,25 +9,26 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 黏结阿拉伯数字与时间量词.
+ * 特定词的黏结
  */
-public class WordCementer {
+public class SpecifiedWordCementer {
 
     private static final Set<Character> TIME_UNITS = new HashSet<>(
             Arrays.asList('年', '月', '日', '号', '时', '点', '分', '秒'));
 
     /**
      * 黏结阿拉伯数字与时间量词.
-     * @param segItems 分词中间结果
+     *
+     * @param tokenItems 分词中间结果
      */
-    public static void cementTimeWord(List<SegItem> segItems) {
-        for (int i = segItems.size() - 1; i > 0; i--) {
-            String word = segItems.get(i).word;
+    public static void cementTimeWord(List<TokenItem> tokenItems) {
+        for (int i = tokenItems.size() - 1; i > 0; i--) {
+            String word = tokenItems.get(i).word;
             if (word.length() == 1 && TIME_UNITS.contains(word.charAt(0))) {
-                SegItem segItem = segItems.get(i - 1);
-                if (isNumberWord(segItem.word)) {
-                    segItems.set(i - 1,
-                            new SegItem(segItem.word + segItems.remove(i).word, "t")
+                TokenItem tokenItem = tokenItems.get(i - 1);
+                if (isNumberWord(tokenItem.word)) {
+                    tokenItems.set(i - 1,
+                            new TokenItem(tokenItem.word + tokenItems.remove(i).word, "t")
                     );
                     i--;
                 }
@@ -43,7 +44,7 @@ public class WordCementer {
      */
     private static boolean isNumberWord(String word) {
         for (char ch : word.toCharArray()) {
-            if (!CharUtils.isDigit(ch)) {
+            if (!CharUtils.isNumeralChar(ch)) {
                 return false;
             }
         }

@@ -10,6 +10,7 @@ import org.powermock.reflect.internal.WhiteboxImpl;
 import java.io.FileInputStream;
 import java.util.Arrays;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(PowerMockRunner.class)
