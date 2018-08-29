@@ -1,7 +1,7 @@
 package io.github.yizhiru.thulac4j.process;
 
 import io.github.yizhiru.thulac4j.term.POC;
-import io.github.yizhiru.thulac4j.term.ResultTerms;
+import io.github.yizhiru.thulac4j.term.AnnotatedTerms;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -12,13 +12,13 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertEquals;
 
 /**
- * AnnotationRuler Test.
+ * RuleAnnotator Test.
  */
-public class AnnotationRulerTest {
+public class RuleAnnotatorTest {
 
     @Test
-    public void rulePocTest() {
-        Map<POC, String> pocStringHashMap = new HashMap<>(12);
+    public void annotate() {
+        Map<POC, String> pocStringHashMap = new HashMap<>(POC.values().length);
         pocStringHashMap.put(POC.PUNCTUATION_POC, "w");
         pocStringHashMap.put(POC.BEGIN_NUMERAL_POC, "bm");
         pocStringHashMap.put(POC.MIDDLE_NUMERAL_POC, "mm");
@@ -51,7 +51,8 @@ public class AnnotationRulerTest {
                 "昨日《上市公司证券发行管理办法》发布",
                 "《21世纪》：",
                 "《探索·发现》栏目",
-                "《麦亚hee》"
+                "《麦亚hee》",
+                "日系＆动漫",
         };
         String[] expectedPocString = new String[]{
                 "sm,bs,d,d,es,bm,mm,em,s",
@@ -61,10 +62,10 @@ public class AnnotationRulerTest {
                 "bs,d,es,sm",
                 "s,sm,s,w,s,bm,mm,mm,mm,mm,em,s",
                 "bs,es,w,bs,d,es",
-                "bs,d,es,w,bs,d,es",
+                "w,bs,es,w,bs,d,es",
                 "b,m,m,e,bs,d,es",
                 "s,bm,mm,mm,mm,mm,mm,mm,mm,mm,em,bs,d,es",
-                "b,m,m,m,e",
+                "b,m,e,w,sm",
                 "bs,d,es,sm",
                 "bs,d,es,w,s",
                 "bs,es,w,w,bs,es,w,w",
@@ -73,13 +74,17 @@ public class AnnotationRulerTest {
                 "w,b,m,m,e,w,w",
                 "w,b,m,m,m,e,w,bs,es",
                 "w,b,m,m,m,e,w",
+                "bs,es,s,bs,es",
         };
 
         for (int i = 0; i < sentences.length; i++) {
-            ResultTerms resultTerms = AnnotationRuler.annotate(sentences[i], true);
-            String result = Stream.of(resultTerms.getSentencePoc())
+            AnnotatedTerms annotatedTerms = RuleAnnotator.annotate(sentences[i], true);
+            String result = Stream.of(annotatedTerms.getPocs())
                     .map(pocStringHashMap::get)
                     .collect(Collectors.joining(","));
+            if(!expectedPocString[i].equals(result)) {
+                System.out.println(sentences[i]);
+            }
             assertEquals(expectedPocString[i], result);
         }
     }

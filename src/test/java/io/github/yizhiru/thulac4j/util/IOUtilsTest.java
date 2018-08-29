@@ -1,7 +1,5 @@
 package io.github.yizhiru.thulac4j.util;
 
-import io.github.yizhiru.thulac4j.common.ModelPaths;
-import io.github.yizhiru.thulac4j.util.IOUtils;
 import org.junit.Test;
 
 import java.io.IOException;

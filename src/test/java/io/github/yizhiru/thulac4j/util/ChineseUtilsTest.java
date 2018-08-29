@@ -2,7 +2,7 @@ package io.github.yizhiru.thulac4j.util;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class ChineseUtilsTest {
 
@@ -28,5 +28,15 @@ public class ChineseUtilsTest {
         for (int i = 0; i < traditions.length; i++) {
             assertEquals(simples[i], ChineseUtils.simplified(traditions[i]));
         }
+    }
+
+
+    @Test
+    public void isStopWords() {
+        assertTrue(ChineseUtils.isStopWord("此时"));
+        assertTrue(ChineseUtils.isStopWord("；"));
+        assertTrue(ChineseUtils.isStopWord("一时"));
+        assertFalse(ChineseUtils.isStopWord("刻"));
+        assertFalse(ChineseUtils.isStopWord("到"));
     }
 }

@@ -9,7 +9,7 @@
 
     <groupId>io.github.yizhiru</groupId>
     <artifactId>thulac4j</artifactId>
-    <version>3.0.0</version>
+    <version>3.1.0</version>
     <packaging>jar</packaging>
 
     <name>thulac4j</name>
@@ -73,13 +73,12 @@
                 <includes>
                     <include>models/*label.txt</include>
                     <include>models/cws*</include>
-                    <include>models/idiom_dat.bin</include>
-                    <include>models/ns_dat.bin</include>
-                    <include>models/stop_dat.bin</include>
+                    <include>models/*dat.bin</include>
                     <include>models/t2s.dat</include>
+                    <include>dicts/core_char.dict</include>
                 </includes>
                 <excludes>
-                    <exclude>dicts</exclude>
+                    <exclude>models/model_c_dat.bin</exclude>
                 </excludes>
             </resource>
         </resources>

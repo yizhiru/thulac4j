@@ -39,7 +39,7 @@ public class DoubleArrayTrie implements Serializable {
 
     public DoubleArrayTrie(int[] baseArray, int[] checkArray) {
         if (baseArray.length != checkArray.length) {
-            throw new IllegalArgumentException(String.format("The length of base array %s != the length of check " +
+            throw new IllegalArgumentException(String.format("The getAnnotatedLength of base array %s != the getAnnotatedLength of check " +
                     "array %s", baseArray.length, checkArray.length));
         }
         this.baseArray = baseArray;
@@ -103,7 +103,6 @@ public class DoubleArrayTrie implements Serializable {
      * 序列化.
      *
      * @param path 文件路径
-     *
      */
     public void serialize(String path) throws IOException {
         FileChannel channel = new FileOutputStream(path).getChannel();
@@ -133,8 +132,13 @@ public class DoubleArrayTrie implements Serializable {
      * @param inputStream 文件输入流
      * @return DAT模型
      */
-    public static DoubleArrayTrie loadDat(InputStream inputStream) throws IOException {
-        int[] array = IOUtils.toIntArray(inputStream);
+    public static DoubleArrayTrie loadDat(InputStream inputStream) {
+        int[] array;
+        try {
+            array = IOUtils.toIntArray(inputStream);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         int arrayLen = array[0];
         int[] baseArr = Arrays.copyOfRange(array, 1, arrayLen + 1);
         int[] checkArr = Arrays.copyOfRange(array, arrayLen + 1, 2 * arrayLen + 1);
@@ -308,20 +312,20 @@ public class DoubleArrayTrie implements Serializable {
         /**
          * 插入到Trie树
          *
-         * @param preIndex 前缀对应的index
+         * @param prefixIndex 前缀对应的index
          * @param children 前缀的后一字符集合
          * @param isWord   前缀是否为词
          */
-        private void insert(int preIndex, List<Integer> children, boolean isWord) {
+        private void insert(int prefixIndex, List<Integer> children, boolean isWord) {
             int bi = findBaseIndex(children);
-            baseArray[preIndex] = bi;
+            baseArray[prefixIndex] = bi;
             if (isWord) {
-                checkArray[bi] = preIndex;
+                checkArray[bi] = prefixIndex;
                 availableBaseIndex = bi + 1;
             }
             for (int c : children) {
                 baseArray[bi + c] = 0;
-                checkArray[bi + c] = preIndex;
+                checkArray[bi + c] = prefixIndex;
             }
         }
 

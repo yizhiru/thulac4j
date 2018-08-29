@@ -1,15 +1,16 @@
 package io.github.yizhiru.thulac4j;
 
+import org.junit.FixMethodOrder;
 import org.junit.Test;
+import org.junit.runners.MethodSorters;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import static io.github.yizhiru.thulac4j.SPChineseTokenizerTest.SEG_FEATURES_PATH;
-import static io.github.yizhiru.thulac4j.SPChineseTokenizerTest.SEG_WEIGHTS_PATH;
 import static org.junit.Assert.assertEquals;
 
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class SegmenterTest {
 
     static final String[] SENTENCES = new String[]{
@@ -139,7 +140,7 @@ public class SegmenterTest {
                 "因",
                 "",
                 "",
-                "UTF-8",
+                "UTF - 8",
                 "iphone5",
                 "鲜芋仙 3",
                 "枪杆子 中 出 政权",
@@ -205,7 +206,7 @@ public class SegmenterTest {
                 "孙君意",
                 "外交部 发言人 马朝旭",
                 "领导人 会议 和 第四 届 东亚 峰会",
-                "在 过去 的 这 五 年",
+                "在 过去 的 这 五年",
                 "还 需要 很 长 的 路 要 走",
                 "60 周年 首都 阅兵",
                 "你好 人们 审美 的 观点 是 不同 的",
@@ -257,9 +258,7 @@ public class SegmenterTest {
 
         Segmenter.enableTitleWord();
         for (int i = 0; i < SENTENCES.length; i++) {
-            String actual = Segmenter.segment(SENTENCES[i])
-                    .stream()
-                    .collect(Collectors.joining(" "));
+            String actual = String.join(" ", Segmenter.segment(SENTENCES[i]));
             assertEquals(expectedResults[i], actual);
         }
 
@@ -274,5 +273,25 @@ public class SegmenterTest {
         long elapsed = (System.currentTimeMillis() - start);
         System.out.println(String.format("time elapsed: %d ms, rate: %.2f kb/s.",
                 elapsed, (length * 1.0) / 1024.0f / (elapsed * 1.0 / 1000.0f)));
+    }
+
+    @Test
+    public void addUserWords() {
+        Segmenter.addUserWords(Arrays.asList("中国风", "淡雅茗香"));
+        assertEquals("浓浓的,中国风,淡雅茗香,古风",
+                String.join(",", Segmenter.segment("浓浓的中国风 淡雅茗香古风")));
+    }
+
+    @Test
+    public void zFilterStopWords() {
+        Segmenter.enableFilterStopWords();
+        assertEquals("我,能,做,的,事,绝不,推诿,到,下,一",
+                String.join(",", Segmenter.segment("此时我能做的事，绝不推诿到下一时刻；")));
+        assertEquals("H,歌,你,的,猎豹,要是,有,你,的,嘴,那么,硬,有,多,好",
+                String.join(",", Segmenter.segment("【H歌】你的猎豹要是有你的嘴那么硬有多好")));
+        assertEquals("沿江,高铁,雏形,初,现,湖北,要,做,祖国,立交桥",
+                String.join(",", Segmenter.segment("沿江高铁雏形初现：湖北要做“祖国立交桥”")));
+        assertEquals("学,得,好,却,总是,考,不好,是,回,事",
+                String.join(",", Segmenter.segment("「学得好却总是考不好」是怎么回事?")));
     }
 }

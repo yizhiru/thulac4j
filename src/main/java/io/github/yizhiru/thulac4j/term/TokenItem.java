@@ -5,10 +5,10 @@ import io.github.yizhiru.thulac4j.common.Nullable;
 /**
  * Word Segment item.
  */
-public final class SegItem {
+public final class TokenItem {
 
     /**
-     * Segmented word.
+     * Tokenized word.
      */
     public final String word;
 
@@ -18,7 +18,7 @@ public final class SegItem {
     @Nullable
     public final String pos;
 
-    public SegItem(String word, String pos) {
+    public TokenItem(String word, String pos) {
         this.word = word;
         this.pos = pos;
     }
@@ -40,9 +40,9 @@ public final class SegItem {
             return false;
         }
 
-        SegItem segItem = (SegItem) o;
-        return (word != null ? word.equals(segItem.word) : segItem.word == null)
-                && (pos != null ? pos.equals(segItem.pos) : segItem.pos == null);
+        TokenItem tokenItem = (TokenItem) o;
+        return (word != null ? word.equals(tokenItem.word) : tokenItem.word == null)
+                && (pos != null ? pos.equals(tokenItem.pos) : tokenItem.pos == null);
     }
 
     @Override

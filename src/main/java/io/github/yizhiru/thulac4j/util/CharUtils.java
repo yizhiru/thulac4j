@@ -1,127 +1,113 @@
 package io.github.yizhiru.thulac4j.util;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import io.github.yizhiru.thulac4j.term.CharType;
+
+import java.io.IOException;
+import java.util.*;
 
 public final class CharUtils {
 
+
+    private static final Map<Character, CharType> CORE_CHAR_TYPE_MAP = loadCharTypeMap();
+
     /**
-     * 标点符合集合
+     * 空格字符，ASCII码值为32
      */
-    private final static Set<Character> SINGLE_PUNCTUATIONS = new HashSet<>(Arrays.asList(
-            '，', '。', '？', '！', '：', '；', '‘', '’', '“', '”', '【', '】', '、',
-            '《', '》', '@', '#', '（', '）', '"', '[', ']', '~', '/', ',', ':', '?', '◤',
-            '☆', '★', '…', '\'', '!', '*', '+', '>', '(', ')', ';', '=')
-    );
+    private static final char LATIN_SPACE_CHAR = ' ';
 
     /**
-     * 除了SINGLE_PUNCTUATIONS以外的标点符号.
+     * 前书名号
      */
-    private final static Set<Character> REMAIN_PUNCTUATIONS = new HashSet<>(Arrays.asList(
-            '·', '—', '￥', '$', '%', '&', '-', '.', '\\', '^', '_', '{', '|', '}')
-    );
-
-    private final static Character LATIN_SPACE = ' ';
-
-    private final static Set<Character> CHINESE_DIGITS = new HashSet<>(Arrays.asList(
-            '〇', '一', '二', '三', '四', '五', '六', '七', '八', '九')
-    );
+    public static final char LEFT_TITLE_QUOTATION_CHAR = '《';
 
     /**
-     * 全角或半角数字.
+     * 后书名号
      */
-    private final static Set<Character> DIGITS = new HashSet<>(Arrays.asList(
-            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-            '０', '１', '２', '３', '４', '５', '６', '７', '８', '９')
-    );
+    public static final char RIGHT_TITLE_QUOTATION_CHAR = '》';
 
     /**
-     * 数词专用标点符合集合
-     */
-    private final static Set<Character> DIGIT_PUNCTUATIONS = new HashSet<>(Arrays.asList(
-            '%', '.', ',', '/', '％', '-')
-    );
-
-    /**
-     * 是否为单独成词的标点符号.
-     */
-    public static boolean isSinglePunctuation(char ch) {
-        return SINGLE_PUNCTUATIONS.contains(ch);
-    }
-
-    public static boolean isRemainPunctuation(char ch) {
-        return REMAIN_PUNCTUATIONS.contains(ch);
-    }
-
-    /**
-     * 是否为控制字符或空格字符，在分词过程中需要略过这样的字符.
+     * 加载核心字符类型词典
      *
-     * @param ch 字符
-     * @return 布尔值，若是则返回true
+     * @return 核心字符映射到字符类型 Map
      */
-    public static boolean isSkipped(char ch) {
-        return (ch < LATIN_SPACE) || Character.isSpaceChar(ch);
-    }
-
-    /**
-     * 是否为字母
-     *
-     * @param ch 字符
-     * @return 布尔值，若是则返回true
-     */
-    public static boolean isLetter(char ch) {
-        return Character.getType(ch) == Character.LOWERCASE_LETTER
-                || Character.getType(ch) == Character.UPPERCASE_LETTER;
-    }
-
-    public static boolean mayBeLetterWord(char ch) {
-        if (isSkipped(ch) || isSinglePunctuation(ch) || isHan(ch)) {
-            return false;
+    private static Map<Character, CharType> loadCharTypeMap() {
+        List<String> lines;
+        try {
+            lines = IOUtils.readLines(CharUtils.class.getResourceAsStream(ModelPaths.CORE_CHAR_PATH));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return true;
+        Map<Character, CharType> map = new HashMap<>(lines.size());
+        for (String line : lines) {
+            String[] arr = line.split("\t");
+            map.put(arr[0].charAt(0), CharType.of(arr[1]));
+        }
+        return map;
     }
 
     /**
-     * 是否为数字（全角或半角）
+     * 映射字符类型
+     *
+     * @param ch 字符
+     * @return 字符类型
+     */
+    public static CharType getCharType(char ch) {
+        if (isSpaceOrControl(ch)) {
+            return CharType.SPACE_OR_CONTROL_CHAR;
+        }
+        return CORE_CHAR_TYPE_MAP.getOrDefault(ch, CharType.OTHER_CHAR);
+    }
+
+
+    /**
+     * 是否为控制字符或空格字符，在分词过程中忽略这样的字符.
      *
      * @param ch 字符
      * @return 布尔值，若是则返回true
      */
-    public static boolean isDigit(char ch) {
-        return DIGITS.contains(ch);
+    public static boolean isSpaceOrControl(char ch) {
+        return (ch < LATIN_SPACE_CHAR) || Character.isSpaceChar(ch);
     }
 
     /**
-     * 是否为数字或数字标点符号.
+     * 英文可与数字联合成词
+     *
+     * @param charType 字符类型
+     * @return 布尔值
+     */
+    public static boolean isPartOfLetterWord(CharType charType) {
+        return charType == CharType.ENGLISH_LETTER_CHAR
+                || charType == CharType.ARABIC_NUMERAL_CHAR
+                || charType == CharType.EX_SINGLE_PUNCTUATION_CHAR;
+    }
+
+
+    /**
+     * 为数词的一部分，数字字符或可与数字搭配的标点符号.
+     *
+     * @param charType 字符类型
+     * @return 布尔值
+     */
+    public static boolean isPartOfNumeral(CharType charType) {
+        return charType == CharType.CHINESE_NUMERAL_CHAR
+                || charType == CharType.ARABIC_NUMERAL_CHAR
+                || charType == CharType.NUMERAL_PUNCTUATION_CHAR;
+    }
+
+    /**
+     * 字符是否为数字
      *
      * @param ch 字符
      * @return 布尔值
      */
-    public static boolean mayBeNumeral(char ch) {
-        if (isSkipped(ch) || isSinglePunctuation(ch) || isHan(ch)) {
-            return false;
-        }
-        return isDigit(ch) || isChineseDigit(ch)
-                || DIGIT_PUNCTUATIONS.contains(ch);
+    public static boolean isNumeralChar(char ch) {
+        CharType charType = getCharType(ch);
+        return charType == CharType.CHINESE_NUMERAL_CHAR
+                || charType == CharType.ARABIC_NUMERAL_CHAR;
     }
 
     /**
-     * 是否为中文数字.
-     *
-     * @param ch 字符
-     * @return 布尔值
-     */
-    public static boolean isChineseDigit(char ch) {
-        return CHINESE_DIGITS.contains(ch);
-    }
-
-    public static boolean isHan(char c) {
-        return Character.UnicodeScript.of(c) == Character.UnicodeScript.HAN;
-    }
-
-    /**
-     * Convert half-width character to full-width character.
+     * 半角字符转全角字符.
      * 半角空格为32, 全角空格为12288;
      * 其他半角字符(33-126)与全角字符(65281-65374)均相差 65248.
      *
