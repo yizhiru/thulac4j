@@ -90,11 +90,11 @@ public class DoubleArrayTrieTest {
 		};
 
 		for (int i = 0; i < binPaths.length; i++) {
-			DoubleArrayTrie stop = DoubleArrayTrie.loadDat(binPaths[i]);
+			DoubleArrayTrie dat = DoubleArrayTrie.loadDat(binPaths[i]);
 			Set<String> dict = Files.lines(Paths.get(dictPaths[i]))
 					.map(String::trim)
 					.collect(Collectors.toSet());
-			List<String> words = DoubleArrayTrie.restore(stop);
+			List<String> words = DoubleArrayTrie.restore(dat);
 			for (String word : words) {
 				assertTrue(dict.contains(word));
 			}

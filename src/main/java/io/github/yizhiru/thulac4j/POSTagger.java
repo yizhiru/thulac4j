@@ -25,7 +25,7 @@ public class POSTagger extends SPChineseTokenizer {
 	 * @param text 输入句子
 	 * @return 词与词性结对结果
 	 */
-	List<TokenItem> tagging(String text) {
+	public List<TokenItem> tagging(String text) {
 		return tokenize(text);
 	}
 }
