@@ -9,6 +9,12 @@
 
 Git 发布使用 `v4.0.0` 标签；GitHub Release 说明取自[本次更新日志](../CHANGELOG.md)。Maven Central 的发布回执与 GitHub Release 分别记录。
 
+## 协作署名
+
+本次 4.0.0 的代码优化、测试与性能验证、文档整理及发布工作由 yizhiru 与 AI 助手 Codex 协作完成。2026-10-15 追加协作署名记录，并在该追加提交中使用 `Co-authored-by: Codex <codex@openai.com>`。
+
+原发布提交 `fefdcb07a6a1ac71cc2bf22e006040372ac1d25b` 和 `v4.0.0` 标签保持不变，已发布产物不变。
+
 ## 检查结果
 
 | 项目 | 结果 | 说明 |
