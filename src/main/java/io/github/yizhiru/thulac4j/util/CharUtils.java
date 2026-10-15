@@ -33,7 +33,7 @@ public final class CharUtils {
 	private static Map<Character, CharType> loadCharTypeMap() {
 		List<String> lines;
 		try {
-			lines = IOUtils.readLines(CharUtils.class.getResourceAsStream(ModelPaths.CORE_CHAR_PATH));
+			lines = IOUtils.readLines(IOUtils.openResource(ModelPaths.CORE_CHAR_PATH));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

@@ -3,6 +3,7 @@ package io.github.yizhiru.thulac4j.util;
 import io.github.yizhiru.thulac4j.common.DoubleArrayTrie;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
 public final class ChineseUtils {
@@ -25,8 +26,8 @@ public final class ChineseUtils {
 	 */
 	private static HashMap<Character, Character> parseT2sMap() {
 		int[] array;
-		try {
-			array = IOUtils.toIntArray(ChineseUtils.class.getResourceAsStream(ModelPaths.T2S_PATH));
+		try (InputStream input = IOUtils.openResource(ModelPaths.T2S_PATH)) {
+			array = IOUtils.toIntArray(input);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

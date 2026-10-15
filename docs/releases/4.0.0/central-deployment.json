@@ -1,0 +1,9 @@
+{
+  "deploymentId": "6a6dd314-e123-49f4-a275-24a15198b2c0",
+  "deploymentName": "Deployment",
+  "deploymentState": "PUBLISHED",
+  "purls": [
+    "pkg:maven/io.github.yizhiru/thulac4j@4.0.0"
+  ],
+  "errors": {}
+}

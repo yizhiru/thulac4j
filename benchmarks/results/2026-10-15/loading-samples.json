@@ -1,0 +1,142 @@
+[
+  {
+    "initialization_ms": 107.033916,
+    "mode": "segment",
+    "version": "baseline",
+    "iteration": 0,
+    "peak_rss_bytes": 641351680
+  },
+  {
+    "initialization_ms": 59.370167,
+    "mode": "segment",
+    "version": "optimized",
+    "iteration": 0,
+    "peak_rss_bytes": 170622976
+  },
+  {
+    "initialization_ms": 57.760291,
+    "mode": "segment",
+    "version": "optimized",
+    "iteration": 1,
+    "peak_rss_bytes": 171065344
+  },
+  {
+    "initialization_ms": 120.589875,
+    "mode": "segment",
+    "version": "baseline",
+    "iteration": 1,
+    "peak_rss_bytes": 642662400
+  },
+  {
+    "initialization_ms": 106.612625,
+    "mode": "segment",
+    "version": "baseline",
+    "iteration": 2,
+    "peak_rss_bytes": 641630208
+  },
+  {
+    "initialization_ms": 60.289666,
+    "mode": "segment",
+    "version": "optimized",
+    "iteration": 2,
+    "peak_rss_bytes": 171311104
+  },
+  {
+    "initialization_ms": 61.189209,
+    "mode": "segment",
+    "version": "optimized",
+    "iteration": 3,
+    "peak_rss_bytes": 171245568
+  },
+  {
+    "initialization_ms": 107.140625,
+    "mode": "segment",
+    "version": "baseline",
+    "iteration": 3,
+    "peak_rss_bytes": 644005888
+  },
+  {
+    "initialization_ms": 110.710125,
+    "mode": "segment",
+    "version": "baseline",
+    "iteration": 4,
+    "peak_rss_bytes": 642662400
+  },
+  {
+    "initialization_ms": 64.00075,
+    "mode": "segment",
+    "version": "optimized",
+    "iteration": 4,
+    "peak_rss_bytes": 172802048
+  },
+  {
+    "initialization_ms": 630.3375,
+    "mode": "pos",
+    "version": "baseline",
+    "iteration": 0,
+    "peak_rss_bytes": 1002012672
+  },
+  {
+    "initialization_ms": 124.34775,
+    "mode": "pos",
+    "version": "optimized",
+    "iteration": 0,
+    "peak_rss_bytes": 466567168
+  },
+  {
+    "initialization_ms": 123.654458,
+    "mode": "pos",
+    "version": "optimized",
+    "iteration": 1,
+    "peak_rss_bytes": 465272832
+  },
+  {
+    "initialization_ms": 319.918667,
+    "mode": "pos",
+    "version": "baseline",
+    "iteration": 1,
+    "peak_rss_bytes": 1151041536
+  },
+  {
+    "initialization_ms": 270.578333,
+    "mode": "pos",
+    "version": "baseline",
+    "iteration": 2,
+    "peak_rss_bytes": 1151205376
+  },
+  {
+    "initialization_ms": 128.927708,
+    "mode": "pos",
+    "version": "optimized",
+    "iteration": 2,
+    "peak_rss_bytes": 464732160
+  },
+  {
+    "initialization_ms": 135.894333,
+    "mode": "pos",
+    "version": "optimized",
+    "iteration": 3,
+    "peak_rss_bytes": 465420288
+  },
+  {
+    "initialization_ms": 261.269709,
+    "mode": "pos",
+    "version": "baseline",
+    "iteration": 3,
+    "peak_rss_bytes": 1151680512
+  },
+  {
+    "initialization_ms": 264.77625,
+    "mode": "pos",
+    "version": "baseline",
+    "iteration": 4,
+    "peak_rss_bytes": 1150713856
+  },
+  {
+    "initialization_ms": 127.489458,
+    "mode": "pos",
+    "version": "optimized",
+    "iteration": 4,
+    "peak_rss_bytes": 465223680
+  }
+]

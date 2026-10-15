@@ -1,10 +1,12 @@
 package io.github.yizhiru.thulac4j;
 
+import io.github.yizhiru.thulac4j.ModelIntegrationTest;
 import io.github.yizhiru.thulac4j.term.TokenItem;
+
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
 import static io.github.yizhiru.thulac4j.SPChineseTokenizerTest.POS_FEATURES_PATH;
@@ -12,6 +14,7 @@ import static io.github.yizhiru.thulac4j.SPChineseTokenizerTest.POS_WEIGHTS_PATH
 import static io.github.yizhiru.thulac4j.SegmenterTest.SENTENCES;
 import static org.junit.Assert.assertEquals;
 
+@Category(ModelIntegrationTest.class)
 public class POSTaggerTest {
 
 	@Test
@@ -151,16 +154,6 @@ public class POSTaggerTest {
 			assertEquals(expectedResults[i], actual);
 		}
 
-		long length = 0L;
-		long start = System.currentTimeMillis();
-		for (int i = 0; i < 100; ++i) {
-			for (String sentence : SENTENCES) {
-				posTagger.tagging(sentence);
-				length += sentence.getBytes(StandardCharsets.UTF_8).length;
-			}
-		}
-		long elapsed = (System.currentTimeMillis() - start);
-		System.out.println(String.format("time elapsed: %d ms, rate: %.2f kb/s.",
-				elapsed, (length * 1.0) / 1024.0f / (elapsed * 1.0 / 1000.0f)));
+
 	}
 }

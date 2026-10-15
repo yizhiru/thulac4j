@@ -1,7 +1,10 @@
 package io.github.yizhiru.thulac4j.common;
 
 import io.github.yizhiru.thulac4j.util.ModelPaths;
+
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -13,6 +16,19 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.*;
 
 public class DoubleArrayTrieTest {
+	@Rule public TemporaryFolder temporary = new TemporaryFolder();
+
+	@Test public void copiesInputAcceptsImmutableListsAndDeduplicates() {
+		List<String> words = new java.util.ArrayList<>(java.util.Arrays.asList("甲", "乙", "甲"));
+		DoubleArrayTrie dat = DoubleArrayTrie.make(java.util.Collections.unmodifiableList(words));
+		assertEquals(java.util.Arrays.asList("甲", "乙", "甲"), words);
+		assertTrue(dat.isWordMatched("甲"));
+		assertTrue(dat.isWordMatched("乙"));
+		assertEquals(2, DoubleArrayTrie.restore(dat).size());
+		assertFalse(DoubleArrayTrie.make(java.util.Collections.emptyList()).isWordMatched("甲"));
+		assertThrows(IllegalArgumentException.class, () -> DoubleArrayTrie.make(java.util.Arrays.asList("甲", "")));
+		assertThrows(IllegalArgumentException.class, () -> DoubleArrayTrie.make(java.util.Arrays.asList("甲", null)));
+	}
 
 	@Test
 	public void isMatched() throws IOException {
@@ -44,8 +60,9 @@ public class DoubleArrayTrieTest {
 		};
 		for (int i = 0; i < dictPaths.length; i++) {
 			DoubleArrayTrie expect = DoubleArrayTrie.make(dictPaths[i]);
-			expect.serialize(binPaths[i]);
-			DoubleArrayTrie actual = DoubleArrayTrie.loadDat(binPaths[i]);
+			String output = temporary.newFile().getAbsolutePath();
+			expect.serialize(output);
+			DoubleArrayTrie actual = DoubleArrayTrie.loadDat(output);
 
 			assertEquals(expect.size(), actual.size());
 			for (int j = 0; j < expect.size(); j++) {
@@ -63,7 +80,7 @@ public class DoubleArrayTrieTest {
 				ModelPaths.STOP_WORDS_DICT_PATH
 		};
 		for (String path : paths) {
-			List<String> lexicon = Files.lines(Paths.get(path))
+			List<String> lexicon = Files.readAllLines(Paths.get(path)).stream()
 					.map(String::trim)
 					.collect(Collectors.toList());
 			DoubleArrayTrie dat = DoubleArrayTrie.make(path);
@@ -91,7 +108,7 @@ public class DoubleArrayTrieTest {
 
 		for (int i = 0; i < binPaths.length; i++) {
 			DoubleArrayTrie dat = DoubleArrayTrie.loadDat(binPaths[i]);
-			Set<String> dict = Files.lines(Paths.get(dictPaths[i]))
+			Set<String> dict = Files.readAllLines(Paths.get(dictPaths[i])).stream()
 					.map(String::trim)
 					.collect(Collectors.toSet());
 			List<String> words = DoubleArrayTrie.restore(dat);

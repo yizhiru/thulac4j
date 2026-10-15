@@ -1,20 +1,14 @@
 package io.github.yizhiru.thulac4j;
 
-import io.github.yizhiru.thulac4j.perceptron.StructuredPerceptronClassifier;
+import io.github.yizhiru.thulac4j.util.IOUtils;
+
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.internal.WhiteboxImpl;
 
 import java.io.FileInputStream;
 import java.util.Arrays;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(StructuredPerceptronClassifier.class)
 public class SPChineseTokenizerTest {
 
 	/**
@@ -43,30 +37,14 @@ public class SPChineseTokenizerTest {
 
 	@Test
 	public void setPreviousTrans() throws Exception {
-		SPChineseTokenizer tokenizer = new SPChineseTokenizer(
-				new FileInputStream(SEG_WEIGHTS_PATH),
-				new FileInputStream(SEG_FEATURES_PATH),
-				new FileInputStream(SEG_LABELS_PATH));
-		StructuredPerceptronClassifier classifier = WhiteboxImpl.getInternalState(tokenizer, "classifier");
-		int[][] previousTrans = WhiteboxImpl.invokeMethod(
-				tokenizer,
-				"setPreviousTransitions",
-				new Class<?>[]{String[].class},
-				(Object) classifier.getLabelValues());
+		int[][] previousTrans = SPChineseTokenizer.setPreviousTransitions(
+				IOUtils.readLines(new FileInputStream(SEG_LABELS_PATH)).toArray(new String[0]));
 
 		assertEquals("[[1, 2], [0, 3], [1, 2], [0, 3]]",
 				Arrays.deepToString(previousTrans));
 
-		tokenizer = new SPChineseTokenizer(
-				new FileInputStream(POS_WEIGHTS_PATH),
-				new FileInputStream(POS_FEATURES_PATH),
-				new FileInputStream(POS_LABELS_PATH));
-		classifier = WhiteboxImpl.getInternalState(tokenizer, "classifier");
-		previousTrans = WhiteboxImpl.invokeMethod(
-				tokenizer,
-				"setPreviousTransitions",
-				new Class<?>[]{String[].class},
-				(Object) classifier.getLabelValues());
+		previousTrans = SPChineseTokenizer.setPreviousTransitions(
+				IOUtils.readLines(new FileInputStream(POS_LABELS_PATH)).toArray(new String[0]));
 		assertEquals("[1, 2, 4, 5, 7, 10, 13, 15, 17, 18, 19, 23, 25, 27, " +
 						"30, 32, 33, 34, 35, 36, 37, 38, 39, 41, 44, 45, 48, 50, 53, " +
 						"56, 57, 59, 61, 63, 67, 69, 72, 74, 76, 80, 81, 82, 83, 88, " +

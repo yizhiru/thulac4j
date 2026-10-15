@@ -1,0 +1,8 @@
+{
+  "fingerprint": "9FEC6C1950155646FF09615ED74CC1FE5271BB25",
+  "identity": "Zheng Jiangyu <j.y.zheng@qq.com>",
+  "algorithm": "RSA 3072",
+  "expires": "2028-10-14",
+  "keyserver": "hkps://keyserver.ubuntu.com",
+  "public_key_retrieved_and_fingerprint_verified": true
+}

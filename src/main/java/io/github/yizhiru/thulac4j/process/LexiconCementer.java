@@ -6,7 +6,9 @@ import io.github.yizhiru.thulac4j.term.TokenItem;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.RandomAccess;
 
 /**
  * 基于词典黏结词.
@@ -48,32 +50,25 @@ public final class LexiconCementer implements Serializable {
 	}
 
 	public void cement(List<TokenItem> tokenItems) {
-		int index;
-		int j;
-		for (int i = 0; i < tokenItems.size(); i++) {
-			index = -dat.match(0, tokenItems.get(i).word);
-			if (index <= 0) {
-				continue;
+		List<TokenItem> source = tokenItems instanceof RandomAccess ? tokenItems : new ArrayList<>(tokenItems);
+		List<TokenItem> result = new ArrayList<>(source.size());
+		for (int i = 0; i < source.size(); ) {
+			int index = 0;
+			int lastWordEnd = -1;
+			for (int j = i; j < source.size(); j++) {
+				index = -dat.match(index, source.get(j).word);
+				if (index <= 0) break;
+				if (dat.isWordMatched(index)) lastWordEnd = j;
 			}
-			StringBuilder builder = new StringBuilder(tokenItems.get(i).word);
-			for (j = i + 1; j < tokenItems.size(); j++) {
-				int preIndex = index;
-				index = -dat.match(index, tokenItems.get(j).word);
-				// 后面的词没有匹配上词典
-				if (index <= 0) {
-					index = preIndex;
-					break;
-				}
-				builder.append(tokenItems.get(j).word);
-			}
-			// 若其后的词匹配上词典，则进行黏词
-			String word = builder.toString();
-			if (dat.isWordMatched(index)) {
-				tokenItems.set(i, new TokenItem(word, pos));
-				for (j = j - 1; j > i; j--) {
-					tokenItems.remove(j);
-				}
+			if (lastWordEnd < 0) {
+				result.add(source.get(i++));
+			} else {
+				StringBuilder word = new StringBuilder();
+				for (; i <= lastWordEnd; i++) word.append(source.get(i).word);
+				result.add(new TokenItem(word.toString(), pos));
 			}
 		}
+		tokenItems.clear();
+		tokenItems.addAll(result);
 	}
 }

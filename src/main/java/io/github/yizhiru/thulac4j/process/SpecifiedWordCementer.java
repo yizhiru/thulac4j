@@ -3,9 +3,12 @@ package io.github.yizhiru.thulac4j.process;
 import io.github.yizhiru.thulac4j.term.TokenItem;
 import io.github.yizhiru.thulac4j.util.CharUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.RandomAccess;
 import java.util.Set;
 
 /**
@@ -37,79 +40,34 @@ public class SpecifiedWordCementer {
 	 * @param tokenItems 分词中间结果
 	 */
 	public static void cementWord(List<TokenItem> tokenItems) {
-		for (int i = tokenItems.size() - 1; i > 0; i--) {
-			TokenItem item = tokenItems.get(i);
-			String word = item.word;
-			if (TIME_UNIT_WORDS.contains(word)) {
-				i = cementTimeWord(tokenItems, item, i);
-			} else if (CAN_FORM_REPEATED_WORDS.contains(word)) {
-				i = cementRepeatedWord(tokenItems, item, i);
-			}
-		}
-	}
-
-	/**
-	 * 黏结阿拉伯数字与时间量词
-	 *
-	 * @param tokenItems   分词中间结果
-	 * @param timeUnitItem 时间单位词项
-	 * @param endIndex     结束索引值
-	 * @return 时间词的开始索引位置
-	 */
-	private static int cementTimeWord(List<TokenItem> tokenItems,
-	                                  TokenItem timeUnitItem,
-	                                  int endIndex) {
-		String timeUit = timeUnitItem.word;
-		if (endIndex - 1 >= 0) {
-			String previousWord = tokenItems.get(endIndex - 1).word;
-			if (isNumeralWord(previousWord)) {
-				if (timeUit.equals(YEAR_TIME_UNIT_WORD) && previousWord.length() < 4) {
-					return endIndex;
+		List<TokenItem> source = tokenItems instanceof RandomAccess ? tokenItems : new ArrayList<>(tokenItems);
+		List<TokenItem> reversed = new ArrayList<>(source.size());
+		for (int end = source.size() - 1; end >= 0; ) {
+			TokenItem item = source.get(end);
+			int start = end;
+			String pos = item.pos;
+			if (TIME_UNIT_WORDS.contains(item.word) && end > 0) {
+				String previous = source.get(end - 1).word;
+				if (isNumeralWord(previous)
+						&& (!YEAR_TIME_UNIT_WORD.equals(item.word) || previous.length() >= 4)) {
+					while (start > 0 && isNumeralWord(source.get(start - 1).word)) start--;
+					pos = "t";
 				}
-				tokenItems.remove(endIndex);
-				StringBuilder builder = new StringBuilder(previousWord + timeUnitItem.word);
-				int j = endIndex - 2;
-				for (; j >= 0; j--) {
-					String w = tokenItems.get(j).word;
-					if (isNumeralWord(w)) {
-						tokenItems.remove(j + 1);
-						builder.insert(0, w);
-					} else {
-						break;
-					}
-				}
-				tokenItems.set(j + 1,
-						new TokenItem(builder.toString(), "t"));
-				return j + 1;
+			} else if (CAN_FORM_REPEATED_WORDS.contains(item.word)) {
+				while (start > 0 && item.word.equals(source.get(start - 1).word)) start--;
 			}
-		}
-		return endIndex;
-	}
-
-	/**
-	 * 黏结左右相同的特定词
-	 *
-	 * @param tokenItems   分词中间结果
-	 * @param repeatedItem 重复的特定词项
-	 * @param endIndex     结束索引值
-	 * @return 词的开始索引位置
-	 */
-	private static int cementRepeatedWord(List<TokenItem> tokenItems,
-	                                      TokenItem repeatedItem,
-	                                      int endIndex) {
-		String word = repeatedItem.word;
-		int i = endIndex - 1;
-		if (i >= 0 && tokenItems.get(i).word.equals(word)) {
-			StringBuilder builder = new StringBuilder(word + word);
-			tokenItems.remove(endIndex);
-			for (i--; i >= 0 && tokenItems.get(i).word.equals(word); i--) {
-				builder.insert(0, word);
-				tokenItems.remove(i + 1);
+			if (start == end) {
+				reversed.add(item);
+			} else {
+				StringBuilder word = new StringBuilder();
+				for (int i = start; i <= end; i++) word.append(source.get(i).word);
+				reversed.add(new TokenItem(word.toString(), pos));
 			}
-			tokenItems.set(i + 1,
-					new TokenItem(builder.toString(), repeatedItem.pos));
+			end = start - 1;
 		}
-		return i + 1;
+		Collections.reverse(reversed);
+		tokenItems.clear();
+		tokenItems.addAll(reversed);
 	}
 
 	/**
@@ -119,8 +77,9 @@ public class SpecifiedWordCementer {
 	 * @return 布尔值
 	 */
 	private static boolean isNumeralWord(String word) {
-		for (char ch : word.toCharArray()) {
-			if (!CharUtils.isNumeral(ch)) {
+		if (word.isEmpty()) return false;
+		for (int i = 0; i < word.length(); i++) {
+			if (!CharUtils.isNumeral(word.charAt(i))) {
 				return false;
 			}
 		}

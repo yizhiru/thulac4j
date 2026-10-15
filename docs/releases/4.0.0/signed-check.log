@@ -1,0 +1,19 @@
+Packaged-jar example passed: SegmentExample
+Packaged-jar example passed: TaggingExample
+Packaged-jar example passed: ConfigExample
+Packaged-jar example passed: DictionaryExample
+Packaged-jar corpus passed: segment 117/117
+Packaged-jar corpus passed: pos 117/117
+gpg: Signature made Thu Oct 15 10:11:06 2026 CST
+gpg:                using RSA key 9FEC6C1950155646FF09615ED74CC1FE5271BB25
+gpg: Good signature from "Zheng Jiangyu <j.y.zheng@qq.com>" [ultimate]
+gpg: Signature made Thu Oct 15 10:11:06 2026 CST
+gpg:                using RSA key 9FEC6C1950155646FF09615ED74CC1FE5271BB25
+gpg: Good signature from "Zheng Jiangyu <j.y.zheng@qq.com>" [ultimate]
+gpg: Signature made Thu Oct 15 10:11:06 2026 CST
+gpg:                using RSA key 9FEC6C1950155646FF09615ED74CC1FE5271BB25
+gpg: Good signature from "Zheng Jiangyu <j.y.zheng@qq.com>" [ultimate]
+gpg: Signature made Thu Oct 15 10:11:06 2026 CST
+gpg:                using RSA key 9FEC6C1950155646FF09615ED74CC1FE5271BB25
+gpg: Good signature from "Zheng Jiangyu <j.y.zheng@qq.com>" [ultimate]
+Release archive checks passed. Signatures verified: True

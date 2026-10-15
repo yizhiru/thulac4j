@@ -1,0 +1,32 @@
+{
+  "version": "4.0.0",
+  "java": "/Library/Java/JavaVirtualMachines/jdk-19.jdk/Contents/Home/bin/java",
+  "bytecode_major": 52,
+  "classes": 26,
+  "examples": [
+    "SegmentExample",
+    "TaggingExample",
+    "ConfigExample",
+    "DictionaryExample"
+  ],
+  "corpus_predictions": 234,
+  "signatures_verified": false,
+  "remote_upload_performed": false,
+  "artifacts": [
+    {
+      "file": "thulac4j-4.0.0.jar",
+      "bytes": 30002190,
+      "sha256": "c08114d6ff54ebae8135dd752f4a4b5da30c08473a6a7b4278b145cc34dd0de9"
+    },
+    {
+      "file": "thulac4j-4.0.0-sources.jar",
+      "bytes": 32318,
+      "sha256": "d661905428e770435ba9d998b521b0c58991406666973c2ca389d34120ce2e0d"
+    },
+    {
+      "file": "thulac4j-4.0.0-javadoc.jar",
+      "bytes": 4313424,
+      "sha256": "f4d5e709c53f743359f05b1bf83b543ab0a2d7b44429c41c387f9dcde330ec7a"
+    }
+  ]
+}

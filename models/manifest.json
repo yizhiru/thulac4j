@@ -1,0 +1,32 @@
+{
+  "package": "thulac 0.2.2",
+  "source_page": "https://pypi.org/project/thulac/0.2.2/",
+  "download_url": "https://files.pythonhosted.org/packages/7c/d1/1529cba069658689b8d9fb90205e0a8d1ff41a507fb9c458e17aa8217cdf/thulac-0.2.2-py3-none-any.whl",
+  "archive_sha256": "642503118cb08afdd3ed0b0e5d0a8d1305185b7b2fd7fececee27b204a586320",
+  "files": {
+    "cws_model.bin": {
+      "size": 39262152,
+      "sha256": "ac3a67bce956cccb6993fc4febf92c1646d334c2dc25b884066ae564980feeea"
+    },
+    "cws_dat.bin": {
+      "size": 61144568,
+      "sha256": "0f938211774c6e4c9b8642f8fc1e48fd758277f3cba8109a070c8755b1774f06"
+    },
+    "model_c_model.bin": {
+      "size": 369241352,
+      "sha256": "b795ffd004cc75f4bb27a5cc132f77c1608300c6283e12fac90fd518ae8932c2"
+    },
+    "model_c_dat.bin": {
+      "size": 23752648,
+      "sha256": "8bd4d8be35e6c136c775157ed542244a0bdad0813ebc457774c074ca4eb6b90d"
+    },
+    "cws_label.txt": {
+      "size": 8,
+      "sha256": "ecaaf36c81348fd5b67561714e68f1912160fe711fba809817c7fa7cab3c5f17"
+    },
+    "model_c_label.txt": {
+      "size": 306,
+      "sha256": "aad69b274f519de13c14854615a73e7b71335bde686f694179acc420df347b44"
+    }
+  }
+}

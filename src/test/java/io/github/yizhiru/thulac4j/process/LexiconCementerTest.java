@@ -1,7 +1,8 @@
 package io.github.yizhiru.thulac4j.process;
 
-import io.github.yizhiru.thulac4j.util.ModelPaths;
 import io.github.yizhiru.thulac4j.term.TokenItem;
+import io.github.yizhiru.thulac4j.util.ModelPaths;
+
 import org.junit.Test;
 
 import java.io.IOException;
@@ -12,6 +13,20 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class LexiconCementerTest {
+
+	@Test
+	public void fallsBackToLastCompleteWordAndPrefersLongestMatch() {
+		LexiconCementer cementer = new LexiconCementer(
+				io.github.yizhiru.thulac4j.common.DoubleArrayTrie.make(Arrays.asList("北京", "北京大学")), "uw");
+		String[][] inputs = {{"北", "京", "大", "餐"}, {"北", "京", "大", "学"}, {"北", "京", "大"}, {"北", "海"}};
+		String[] expected = {"[北京/uw, 大, 餐]", "[北京大学/uw]", "[北京/uw, 大]", "[北, 海]"};
+		for (int i = 0; i < inputs.length; i++) {
+			List<TokenItem> tokens = new ArrayList<>();
+			for (String word : inputs[i]) tokens.add(new TokenItem(word, null));
+			cementer.cement(tokens);
+			assertEquals(expected[i], tokens.toString());
+		}
+	}
 
 	@Test
 	public void cement() throws IOException {
