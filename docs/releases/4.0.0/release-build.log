@@ -1,0 +1,89 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ---------------------< io.github.yizhiru:thulac4j >---------------------
+[INFO] Building thulac4j 4.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ thulac4j ---
+[INFO] Deleting /Users/rain/Documents/projects/diverse/thulac4j/target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ thulac4j ---
+[INFO] Copying 9 resources from  to target/classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ thulac4j ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 19 source files with javac [debug release 8] to target/classes
+[WARNING] 源值 8 已过时，将在未来发行版中删除
+[WARNING] 目标值 8 已过时，将在未来发行版中删除
+[WARNING] 要隐藏有关已过时选项的警告, 请使用 -Xlint:-options。
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ thulac4j ---
+[INFO] skip non existing resourceDirectory /Users/rain/Documents/projects/diverse/thulac4j/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ thulac4j ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 17 source files with javac [debug release 8] to target/test-classes
+[WARNING] 源值 8 已过时，将在未来发行版中删除
+[WARNING] 目标值 8 已过时，将在未来发行版中删除
+[WARNING] 要隐藏有关已过时选项的警告, 请使用 -Xlint:-options。
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ thulac4j ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junit4.JUnit4Provider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running io.github.yizhiru.thulac4j.SPChineseTokenizerTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.023 s -- in io.github.yizhiru.thulac4j.SPChineseTokenizerTest
+[INFO] Running io.github.yizhiru.thulac4j.util.CharUtilsTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in io.github.yizhiru.thulac4j.util.CharUtilsTest
+[INFO] Running io.github.yizhiru.thulac4j.util.IOUtilsTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in io.github.yizhiru.thulac4j.util.IOUtilsTest
+[INFO] Running io.github.yizhiru.thulac4j.util.ChineseUtilsTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in io.github.yizhiru.thulac4j.util.ChineseUtilsTest
+[INFO] Running io.github.yizhiru.thulac4j.TokenizerOptionsTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.037 s -- in io.github.yizhiru.thulac4j.TokenizerOptionsTest
+[INFO] Running io.github.yizhiru.thulac4j.term.POCTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in io.github.yizhiru.thulac4j.term.POCTest
+[INFO] Running io.github.yizhiru.thulac4j.DecoderTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.050 s -- in io.github.yizhiru.thulac4j.DecoderTest
+[INFO] Running io.github.yizhiru.thulac4j.ModelLoadingTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in io.github.yizhiru.thulac4j.ModelLoadingTest
+[INFO] Running io.github.yizhiru.thulac4j.common.DoubleArrayTrieTest
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.122 s -- in io.github.yizhiru.thulac4j.common.DoubleArrayTrieTest
+[INFO] Running io.github.yizhiru.thulac4j.POSTaggerTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.437 s -- in io.github.yizhiru.thulac4j.POSTaggerTest
+[INFO] Running io.github.yizhiru.thulac4j.perceptron.StructuredPerceptronModelTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.355 s -- in io.github.yizhiru.thulac4j.perceptron.StructuredPerceptronModelTest
+[INFO] Running io.github.yizhiru.thulac4j.SegmenterTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.080 s -- in io.github.yizhiru.thulac4j.SegmenterTest
+[INFO] Running io.github.yizhiru.thulac4j.process.LexiconCementerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in io.github.yizhiru.thulac4j.process.LexiconCementerTest
+[INFO] Running io.github.yizhiru.thulac4j.process.RuleAnnotatorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in io.github.yizhiru.thulac4j.process.RuleAnnotatorTest
+[INFO] Running io.github.yizhiru.thulac4j.process.SpecifiedWordCementerTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0 s -- in io.github.yizhiru.thulac4j.process.SpecifiedWordCementerTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 40, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ thulac4j ---
+[INFO] Building jar: /Users/rain/Documents/projects/diverse/thulac4j/target/thulac4j-4.0.0.jar
+[INFO] 
+[INFO] --- source:3.3.1:jar-no-fork (default) @ thulac4j ---
+[INFO] Building jar: /Users/rain/Documents/projects/diverse/thulac4j/target/thulac4j-4.0.0-sources.jar
+[INFO] 
+[INFO] --- javadoc:3.6.3:jar (default) @ thulac4j ---
+[INFO] No previous run data found, generating javadoc.
+[INFO] Building jar: /Users/rain/Documents/projects/diverse/thulac4j/target/thulac4j-4.0.0-javadoc.jar
+[INFO] 
+[INFO] --- gpg:3.2.7:sign (default) @ thulac4j ---
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  9.176 s
+[INFO] Finished at: 2026-10-15T09:42:25+08:00
+[INFO] ------------------------------------------------------------------------

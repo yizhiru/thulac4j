@@ -1,0 +1,33 @@
+{
+  "checked_at": "2026-10-15T10:18:44.512648+08:00",
+  "files": [
+    {
+      "file": "thulac4j-4.0.0.pom",
+      "url": "https://repo.maven.apache.org/maven2/io/github/yizhiru/thulac4j/4.0.0/thulac4j-4.0.0.pom",
+      "http_status": 200,
+      "sha256": "adb79edde6fa91e736a723b970201cb1401f0f40202a81fe6dd59b8003de5fae",
+      "matches_local": true
+    },
+    {
+      "file": "thulac4j-4.0.0.jar",
+      "url": "https://repo.maven.apache.org/maven2/io/github/yizhiru/thulac4j/4.0.0/thulac4j-4.0.0.jar.sha256",
+      "http_status": 200,
+      "sha256": "9b54edebf79ad2d240d9c2c5e3bc361cf3659c147bdbd300893afaa42fd7c34f",
+      "matches_local": true
+    },
+    {
+      "file": "thulac4j-4.0.0-sources.jar",
+      "url": "https://repo.maven.apache.org/maven2/io/github/yizhiru/thulac4j/4.0.0/thulac4j-4.0.0-sources.jar.sha256",
+      "http_status": 200,
+      "sha256": "ba51ca9e2f951aad39499d71916618d19c17ce1076de4578bf391b1ee21e961f",
+      "matches_local": true
+    },
+    {
+      "file": "thulac4j-4.0.0-javadoc.jar",
+      "url": "https://repo.maven.apache.org/maven2/io/github/yizhiru/thulac4j/4.0.0/thulac4j-4.0.0-javadoc.jar.sha256",
+      "http_status": 200,
+      "sha256": "df91a14b4e7b8fe242d4e6d977efbbf790c34aacc7f2ae6f35841546d112879e",
+      "matches_local": true
+    }
+  ]
+}

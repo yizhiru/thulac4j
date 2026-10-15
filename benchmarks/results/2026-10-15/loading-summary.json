@@ -1,0 +1,30 @@
+[
+  {
+    "mode": "segment",
+    "version": "baseline",
+    "median_initialization_ms": 107.140625,
+    "median_peak_rss_bytes": 642662400,
+    "samples": 5
+  },
+  {
+    "mode": "segment",
+    "version": "optimized",
+    "median_initialization_ms": 60.289666,
+    "median_peak_rss_bytes": 171245568,
+    "samples": 5
+  },
+  {
+    "mode": "pos",
+    "version": "baseline",
+    "median_initialization_ms": 270.578333,
+    "median_peak_rss_bytes": 1151041536,
+    "samples": 5
+  },
+  {
+    "mode": "pos",
+    "version": "optimized",
+    "median_initialization_ms": 127.489458,
+    "median_peak_rss_bytes": 465272832,
+    "samples": 5
+  }
+]

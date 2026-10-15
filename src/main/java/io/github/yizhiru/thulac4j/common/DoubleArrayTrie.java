@@ -3,13 +3,11 @@ package io.github.yizhiru.thulac4j.common;
 import io.github.yizhiru.thulac4j.util.IOUtils;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.IntBuffer;
-import java.nio.channels.FileChannel;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -71,7 +69,7 @@ public class DoubleArrayTrie implements Serializable {
 	 * @param index the index value.
 	 */
 	private void ensureValidIndex(int index) {
-		if (index >= size()) {
+		if (index < 0 || index >= size()) {
 			throw new RuntimeException(String.format("The index %s is out of bound [%s].",
 					index, size()));
 		}
@@ -105,15 +103,11 @@ public class DoubleArrayTrie implements Serializable {
 	 * @param path 文件路径
 	 */
 	public void serialize(String path) throws IOException {
-		FileChannel channel = new FileOutputStream(path).getChannel();
-		ByteBuffer byteBuffer = ByteBuffer.allocateDirect(4 * (2 * size() + 1));
-		IntBuffer intBuffer = byteBuffer.order(ByteOrder.LITTLE_ENDIAN)
-				.asIntBuffer();
-		intBuffer.put(size());
-		intBuffer.put(baseArray);
-		intBuffer.put(checkArray);
-		channel.write(byteBuffer);
-		channel.close();
+		try (DataOutputStream output = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path)))) {
+			output.writeInt(Integer.reverseBytes(size()));
+			for (int i = 0; i < size(); i++) output.writeInt(Integer.reverseBytes(baseArray[i]));
+			for (int i = 0; i < size(); i++) output.writeInt(Integer.reverseBytes(checkArray[i]));
+		}
 	}
 
 	/**
@@ -133,16 +127,24 @@ public class DoubleArrayTrie implements Serializable {
 	 * @return DAT模型
 	 */
 	public static DoubleArrayTrie loadDat(InputStream inputStream) {
-		int[] array;
-		try {
-			array = IOUtils.toIntArray(inputStream);
+		try (InputStream owned = inputStream) {
+			if (owned == null) throw new IOException("Missing DAT input stream");
+			DataInputStream input = new DataInputStream(new BufferedInputStream(owned));
+			int length = IOUtils.readLittleEndianInt(input);
+			if (length < 1) throw new IOException("Invalid DAT length: " + length);
+			IOUtils.checkedArrayLength(length, 2);
+			int[] base = IOUtils.readLittleEndianInts(input, length);
+			int[] check = IOUtils.readLittleEndianInts(input, length);
+			if (input.read() != -1) throw new IOException("Unexpected trailing DAT data");
+			for (int i = 0; i < length; i++) {
+				if (check[i] < -1 || check[i] >= length || base[i] < -1) {
+					throw new IOException("Invalid DAT node at index " + i);
+				}
+			}
+			return new DoubleArrayTrie(base, check);
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			throw new UncheckedIOException("Cannot load DAT", e);
 		}
-		int arrayLen = array[0];
-		int[] baseArr = Arrays.copyOfRange(array, 1, arrayLen + 1);
-		int[] checkArr = Arrays.copyOfRange(array, arrayLen + 1, 2 * arrayLen + 1);
-		return new DoubleArrayTrie(baseArr, checkArr);
 	}
 
 	/**
@@ -157,7 +159,7 @@ public class DoubleArrayTrie implements Serializable {
 			return MATCH_FAILURE_INDEX;
 		}
 		int index = baseArray[prefixIndex] + charValue;
-		if (index >= size() || checkArray[index] != prefixIndex) {
+		if (index < 0 || index >= size() || checkArray[index] != prefixIndex) {
 			return MATCH_FAILURE_INDEX;
 		}
 		return index;
@@ -180,11 +182,11 @@ public class DoubleArrayTrie implements Serializable {
 	 * @return 若存在，则为true
 	 */
 	public boolean isWordMatched(int matchedIndex) {
-		if (matchedIndex <= 0) {
+		if (matchedIndex <= 0 || matchedIndex >= size()) {
 			return false;
 		}
 		int base = baseArray[matchedIndex];
-		return base < size() && checkArray[base] == matchedIndex;
+		return base >= 0 && base < size() && checkArray[base] == matchedIndex;
 	}
 
 	/**
@@ -340,7 +342,7 @@ public class DoubleArrayTrie implements Serializable {
 		private List<Integer> generateChildren(List<String> sortedLexicon,
 		                                       int startLexiconIndex,
 		                                       String prefix) {
-			List<Integer> children = new LinkedList<>();
+			List<Integer> children = new ArrayList<>();
 			int prefixLen = prefix.length();
 			for (int i = startLexiconIndex; i < sortedLexicon.size(); i++) {
 				String word = sortedLexicon.get(i);
@@ -348,7 +350,7 @@ public class DoubleArrayTrie implements Serializable {
 				// 1. 词的长度小于前缀长度
 				// 2. 词的前缀与给定前缀不一致
 				if (word.length() < prefixLen
-						|| !word.substring(0, prefixLen).equals(prefix)) {
+						|| !word.startsWith(prefix)) {
 					return children;
 				} else if (word.length() > prefixLen) {
 					int charValue = (int) word.charAt(prefixLen);
@@ -405,15 +407,23 @@ public class DoubleArrayTrie implements Serializable {
 	 * @return DAT
 	 */
 	public static DoubleArrayTrie make(InputStream inputStream) {
-		BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
-		List<String> lexicon = br.lines()
-				.map(String::trim)
-				.collect(Collectors.toList());
-		return make(lexicon);
+		try {
+			return make(IOUtils.readLines(inputStream).stream().map(String::trim)
+					.filter(word -> !word.isEmpty()).collect(Collectors.toList()));
+		} catch (IOException e) {
+			throw new UncheckedIOException("Cannot read dictionary", e);
+		}
 	}
 
 	public static DoubleArrayTrie make(List<String> lexicon) {
-		return new Builder().build(lexicon);
+		Objects.requireNonNull(lexicon, "lexicon");
+		for (String word : lexicon) {
+			if (word == null || word.trim().isEmpty()) {
+				throw new IllegalArgumentException("Dictionary words must not be null or blank");
+			}
+		}
+		if (lexicon.isEmpty()) return new DoubleArrayTrie(new int[]{0}, new int[]{-1});
+		return new Builder().build(lexicon.stream().distinct().collect(Collectors.toList()));
 	}
 
 	/**

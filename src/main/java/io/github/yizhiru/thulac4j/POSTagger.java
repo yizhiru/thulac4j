@@ -1,9 +1,12 @@
 package io.github.yizhiru.thulac4j;
 
+import io.github.yizhiru.thulac4j.perceptron.StructuredPerceptronModel;
 import io.github.yizhiru.thulac4j.term.TokenItem;
+import io.github.yizhiru.thulac4j.util.IOUtils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import static io.github.yizhiru.thulac4j.util.ModelPaths.POS_TAGGING_LABEL_PATH;
@@ -14,9 +17,20 @@ import static io.github.yizhiru.thulac4j.util.ModelPaths.POS_TAGGING_LABEL_PATH;
 public class POSTagger extends SPChineseTokenizer {
 
 	public POSTagger(String weightPath, String featurePath) throws IOException {
-		super(new FileInputStream(weightPath),
-				new FileInputStream(featurePath),
-				POSTagger.class.getResourceAsStream(POS_TAGGING_LABEL_PATH));
+		this(weightPath, featurePath, TokenizerConfig.DEFAULT);
+	}
+
+	public POSTagger(String weightPath, String featurePath, TokenizerConfig config) throws IOException {
+		super(loadModel(weightPath, featurePath), config);
+	}
+
+	private static StructuredPerceptronModel loadModel(
+			String weightPath, String featurePath) throws IOException {
+		try (InputStream weights = new FileInputStream(weightPath);
+		     InputStream features = new FileInputStream(featurePath);
+		     InputStream labels = IOUtils.openResource(POS_TAGGING_LABEL_PATH)) {
+			return new StructuredPerceptronModel(weights, features, labels);
+		}
 	}
 
 	/**

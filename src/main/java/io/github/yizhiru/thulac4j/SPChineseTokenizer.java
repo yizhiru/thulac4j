@@ -1,22 +1,26 @@
 package io.github.yizhiru.thulac4j;
 
 import io.github.yizhiru.thulac4j.common.DoubleArrayTrie;
-import io.github.yizhiru.thulac4j.util.ModelPaths;
 import io.github.yizhiru.thulac4j.common.Nullable;
 import io.github.yizhiru.thulac4j.perceptron.StructuredPerceptronClassifier;
 import io.github.yizhiru.thulac4j.perceptron.StructuredPerceptronModel;
-import io.github.yizhiru.thulac4j.process.RuleAnnotator;
 import io.github.yizhiru.thulac4j.process.LexiconCementer;
+import io.github.yizhiru.thulac4j.process.RuleAnnotator;
 import io.github.yizhiru.thulac4j.process.SpecifiedWordCementer;
 import io.github.yizhiru.thulac4j.term.AnnotatedTerms;
 import io.github.yizhiru.thulac4j.term.TokenItem;
 import io.github.yizhiru.thulac4j.util.ChineseUtils;
+import io.github.yizhiru.thulac4j.util.IOUtils;
+import io.github.yizhiru.thulac4j.util.ModelPaths;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.TreeSet;
 
 import static io.github.yizhiru.thulac4j.perceptron.StructuredPerceptronModel.PocMark.*;
 
@@ -25,7 +29,7 @@ public class SPChineseTokenizer {
 	/**
 	 * 结构感知器模型
 	 */
-	private StructuredPerceptronClassifier classifier;
+	private final StructuredPerceptronClassifier classifier;
 
 	/**
 	 * 前向Label 二维数组
@@ -46,39 +50,43 @@ public class SPChineseTokenizer {
 	 * 自定义词典，可为null
 	 */
 	@Nullable
-	protected LexiconCementer uwCementer = null;
+	protected volatile LexiconCementer uwCementer = null;
+	private List<String> userWords = Collections.emptyList();
+	private volatile TokenizerConfig config;
 
-	private static final class Config {
+	private static final class Dictionaries {
+		static final LexiconCementer NS = load(ModelPaths.NS_BIN_PATH, "ns");
+		static final LexiconCementer IDIOM = load(ModelPaths.IDIOM_BIN_PATH, "i");
 
-		/**
-		 * 是否开启黏结书名号内的词.
-		 */
-		private static boolean isEnableTileWord = false;
-
-		/**
-		 * 是否开启停用词过滤
-		 */
-		private static boolean isEnableFilterStopWords = false;
-
-		/**
-		 * 是否开启转简体中文
-		 */
-		private static boolean isEnableConvertToSimplifiedCHN = false;
-
+		private static LexiconCementer load(String path, String pos) {
+			try {
+				return new LexiconCementer(IOUtils.openResource(path), pos);
+			} catch (IOException e) {
+				throw new UncheckedIOException("Cannot load dictionary " + path, e);
+			}
+		}
 	}
 
-	SPChineseTokenizer(InputStream weightInput, InputStream featureInput, InputStream labelInput) {
-		try {
-			this.classifier = new StructuredPerceptronClassifier(
-					new StructuredPerceptronModel(weightInput, featureInput, labelInput));
-			this.nsCementer = new LexiconCementer(
-					this.getClass().getResourceAsStream(ModelPaths.NS_BIN_PATH), "ns");
-			this.idiomCementer = new LexiconCementer(
-					this.getClass().getResourceAsStream(ModelPaths.IDIOM_BIN_PATH), "i");
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+	/** Loads a model and takes ownership of all three streams, including on failure. */
+	public SPChineseTokenizer(InputStream weightInput, InputStream featureInput, InputStream labelInput) {
+		this(loadModel(weightInput, featureInput, labelInput), TokenizerConfig.DEFAULT);
+	}
+
+	/** The supplied model may be shared, but its arrays must not be modified after publication. */
+	public SPChineseTokenizer(StructuredPerceptronModel model, TokenizerConfig config) {
+		this.classifier = new StructuredPerceptronClassifier(Objects.requireNonNull(model, "model"));
+		this.config = Objects.requireNonNull(config, "config");
+		this.nsCementer = Dictionaries.NS;
+		this.idiomCementer = Dictionaries.IDIOM;
 		this.previousTrans = setPreviousTransitions(classifier.getLabelValues());
+	}
+
+	private static StructuredPerceptronModel loadModel(InputStream weights, InputStream features, InputStream labels) {
+		try {
+			return new StructuredPerceptronModel(weights, features, labels);
+		} catch (IOException e) {
+			throw new UncheckedIOException("Cannot load tokenizer model", e);
+		}
 	}
 
 	/**
@@ -87,11 +95,11 @@ public class SPChineseTokenizer {
 	 * @param labelValues label值
 	 * @return 前向转移二维数组，每行表示该label的所有前向label
 	 */
-	private int[][] setPreviousTransitions(String[] labelValues) {
+	static int[][] setPreviousTransitions(String[] labelValues) {
 		int labelSize = labelValues.length;
 		List<List<Integer>> labelTransitions = new ArrayList<>();
 		for (int i = 0; i < labelSize; i++) {
-			labelTransitions.add(new LinkedList<>());
+			labelTransitions.add(new ArrayList<>());
 		}
 		for (int cur = 0; cur < labelSize; cur++) {
 			for (int pre = 0; pre < labelSize; pre++) {
@@ -155,6 +163,9 @@ public class SPChineseTokenizer {
 	 * @return 序列标注结果
 	 */
 	public List<TokenItem> tokenize(String text) {
+		Objects.requireNonNull(text, "text");
+		TokenizerConfig options = config;
+		LexiconCementer userCementer = uwCementer;
 		List<TokenItem> tokenItems = new ArrayList<>();
 		if (text.length() == 0) {
 			return tokenItems;
@@ -162,11 +173,11 @@ public class SPChineseTokenizer {
 
 		AnnotatedTerms annotatedTerms;
 		// 若开启转简体
-		if (Config.isEnableConvertToSimplifiedCHN) {
+		if (options.convertToSimplifiedChinese) {
 			String simplifiedSentence = ChineseUtils.simplified(text);
-			annotatedTerms = RuleAnnotator.annotate(simplifiedSentence, Config.isEnableTileWord);
+			annotatedTerms = RuleAnnotator.annotate(simplifiedSentence, options.titleWord);
 		} else {
-			annotatedTerms = RuleAnnotator.annotate(text, Config.isEnableTileWord);
+			annotatedTerms = RuleAnnotator.annotate(text, options.titleWord);
 		}
 		if (annotatedTerms.isEmpty()) {
 			return tokenItems;
@@ -189,18 +200,19 @@ public class SPChineseTokenizer {
 				offset = i + 1;
 			}
 		}
-		// 若开启停用词过滤
-		if (Config.isEnableFilterStopWords) {
-			filterStopWords(tokenItems);
-		}
+
 		// 地名词典黏结
 		nsCementer.cement(tokenItems);
 		// 习语词典黏结
 		idiomCementer.cement(tokenItems);
 		// 特定词语黏结
 		SpecifiedWordCementer.cementWord(tokenItems);
-		if (uwCementer != null) {
-			uwCementer.cement(tokenItems);
+		if (userCementer != null) {
+			userCementer.cement(tokenItems);
+		}
+		// Filter only after cementing, preserving punctuation boundaries during matching.
+		if (options.filterStopWords) {
+			filterStopWords(tokenItems);
 		}
 		return tokenItems;
 	}
@@ -210,44 +222,54 @@ public class SPChineseTokenizer {
 	 *
 	 * @param words 词典
 	 */
-	public void addUserWords(List<String> words) {
-		DoubleArrayTrie dat = DoubleArrayTrie.make(words);
-		this.uwCementer = new LexiconCementer(dat, "uw");
+	public synchronized void addUserWords(List<String> words) {
+		List<String> combined = new ArrayList<>(userWords);
+		combined.addAll(Objects.requireNonNull(words, "words"));
+		setUserWords(combined);
 	}
 
-	/**
-	 * 开启书名单独成词
-	 */
-	public void enableTitleWord() {
-		Config.isEnableTileWord = true;
-	}
-
-	/**
-	 * 开启停用词过滤
-	 */
-	public void enableFilterStopWords() {
-		Config.isEnableFilterStopWords = true;
-	}
-
-	/**
-	 * 开启转简写
-	 */
-	public void enableConvertToSimplifiedCHN() {
-		Config.isEnableConvertToSimplifiedCHN = true;
-	}
-
-	/**
-	 * 过滤停用词
-	 *
-	 * @param tokenItems 解码结果
-	 */
-	private void filterStopWords(List<TokenItem> tokenItems) {
-		for (int i = 0; i < tokenItems.size(); ) {
-			if (ChineseUtils.isStopWord(tokenItems.get(i).word)) {
-				tokenItems.remove(i);
-			} else {
-				i++;
+	/** Replaces the user dictionary atomically. An empty list clears it. */
+	public synchronized void setUserWords(List<String> words) {
+		Objects.requireNonNull(words, "words");
+		TreeSet<String> normalized = new TreeSet<>();
+		for (String word : words) {
+			if (word == null || word.trim().isEmpty()) {
+				throw new IllegalArgumentException("User dictionary words must not be null or blank");
 			}
+			normalized.add(word.trim());
 		}
+		List<String> replacement = new ArrayList<>(normalized);
+		LexiconCementer cementer = replacement.isEmpty() ? null
+				: new LexiconCementer(DoubleArrayTrie.make(replacement), "uw");
+		userWords = replacement;
+		uwCementer = cementer;
+	}
+
+	public TokenizerConfig getConfig() {
+		return config;
+	}
+
+	public synchronized void setConfig(TokenizerConfig config) {
+		this.config = Objects.requireNonNull(config, "config");
+	}
+
+	public void enableTitleWord() { setTitleWord(true); }
+	public void enableFilterStopWords() { setFilterStopWords(true); }
+	public void enableConvertToSimplifiedCHN() { setConvertToSimplifiedCHN(true); }
+
+	public synchronized void setTitleWord(boolean enabled) {
+		config = config.withTitleWord(enabled);
+	}
+
+	public synchronized void setFilterStopWords(boolean enabled) {
+		config = config.withFilterStopWords(enabled);
+	}
+
+	public synchronized void setConvertToSimplifiedCHN(boolean enabled) {
+		config = config.withConvertToSimplifiedChinese(enabled);
+	}
+
+	private void filterStopWords(List<TokenItem> tokenItems) {
+		tokenItems.removeIf(item -> ChineseUtils.isStopWord(item.word));
 	}
 }

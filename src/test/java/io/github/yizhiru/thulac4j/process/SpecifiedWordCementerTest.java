@@ -1,6 +1,7 @@
 package io.github.yizhiru.thulac4j.process;
 
 import io.github.yizhiru.thulac4j.term.TokenItem;
+
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -10,6 +11,20 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 
 public class SpecifiedWordCementerTest {
+
+	@Test public void preservesYearRuleAndCombinesLongRuns() {
+		List<TokenItem> tokens = new ArrayList<>();
+		for (String word : new String[]{"2", "年", "20", "01", "日", "—", "…", "…", "甲"}) {
+			tokens.add(new TokenItem(word, null));
+		}
+		SpecifiedWordCementer.cementWord(tokens);
+		assertEquals("[2, 年, 2001日/t, —, ……, 甲]", tokens.toString());
+		tokens.clear();
+		for (int i = 0; i < 10000; i++) tokens.add(new TokenItem("—", "w"));
+		SpecifiedWordCementer.cementWord(tokens);
+		assertEquals(1, tokens.size());
+		assertEquals(10000, tokens.get(0).word.length());
+	}
 
 	@Test
 	public void cement() {

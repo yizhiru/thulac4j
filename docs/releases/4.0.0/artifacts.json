@@ -1,0 +1,43 @@
+{
+  "version": "4.0.0",
+  "java": "/usr/bin/java",
+  "bytecode_major": 52,
+  "classes": 26,
+  "examples": [
+    "SegmentExample",
+    "TaggingExample",
+    "ConfigExample",
+    "DictionaryExample"
+  ],
+  "corpus_predictions": 234,
+  "signatures_verified": true,
+  "remote_upload_performed": true,
+  "artifacts": [
+    {
+      "file": "thulac4j-4.0.0.jar",
+      "bytes": 30002247,
+      "sha256": "9b54edebf79ad2d240d9c2c5e3bc361cf3659c147bdbd300893afaa42fd7c34f"
+    },
+    {
+      "file": "thulac4j-4.0.0-sources.jar",
+      "bytes": 32375,
+      "sha256": "ba51ca9e2f951aad39499d71916618d19c17ce1076de4578bf391b1ee21e961f"
+    },
+    {
+      "file": "thulac4j-4.0.0-javadoc.jar",
+      "bytes": 4313419,
+      "sha256": "df91a14b4e7b8fe242d4e6d977efbbf790c34aacc7f2ae6f35841546d112879e"
+    }
+  ],
+  "publication": {
+    "deploymentId": "6a6dd314-e123-49f4-a275-24a15198b2c0",
+    "deploymentName": "Deployment",
+    "deploymentState": "PUBLISHED",
+    "purls": [
+      "pkg:maven/io.github.yizhiru/thulac4j@4.0.0"
+    ],
+    "errors": {}
+  },
+  "public_repository_verification": "public-repository.json",
+  "note": "Combined final local validation and publication receipt; check_release.py itself never uploads."
+}

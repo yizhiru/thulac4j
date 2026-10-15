@@ -1,0 +1,4 @@
+# Preserve whitespace in the fixed regression corpus and raw measurement records.
+benchmarks/corpus.txt -whitespace
+benchmarks/results/** -whitespace
+docs/releases/**/*.log -whitespace

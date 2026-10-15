@@ -3,6 +3,9 @@ package io.github.yizhiru.thulac4j.perceptron;
 import io.github.yizhiru.thulac4j.common.DoubleArrayTrie;
 import io.github.yizhiru.thulac4j.util.IOUtils;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
@@ -10,6 +13,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import static io.github.yizhiru.thulac4j.common.DoubleArrayTrie.MATCH_FAILURE_INDEX;
@@ -72,37 +77,31 @@ public final class StructuredPerceptronModel implements Serializable {
 	 * @throws IOException if an I/O error occurs
 	 */
 	public StructuredPerceptronModel(InputStream weightInput, InputStream featureInput, InputStream labelInput) throws IOException {
-		// Load weights model
-		ByteBuffer byteBuffer = ByteBuffer.wrap(IOUtils.toByteArray(weightInput));
-		IntBuffer intBuffer = byteBuffer.order(ByteOrder.LITTLE_ENDIAN)
-				.asIntBuffer();
-		labelSize = intBuffer.get();
-		featureSize = intBuffer.get();
-		llWeights = new int[labelSize * labelSize];
-		flWeights = new int[featureSize * labelSize];
-		intBuffer.get(llWeights);
-		intBuffer.get(flWeights);
-
-		// Load feature DAT
-		byteBuffer = ByteBuffer.wrap(IOUtils.toByteArray(featureInput));
-		// int类型占4个字节
-		int arrayLen = byteBuffer.remaining() / 4;
-		int[] featureArray = new int[arrayLen];
-		intBuffer = byteBuffer.order(ByteOrder.LITTLE_ENDIAN)
-				.asIntBuffer();
-		intBuffer.get(featureArray);
-		// convert feature DAT
-		int[] baseArr = new int[arrayLen / 2];
-		int[] checkArr = new int[arrayLen / 2];
-		for (int i = 0; i < arrayLen / 2; i++) {
-			baseArr[i] = featureArray[2 * i];
-			checkArr[i] = featureArray[2 * i + 1];
+		// Own all streams before validation so failures close every supplied resource.
+		try (InputStream weights = weightInput; InputStream features = featureInput; InputStream labels = labelInput) {
+			if (weights == null || features == null || labels == null) {
+				throw new IOException("Missing model weights, features or labels; see README.md for model setup");
+			}
+			labelValues = IOUtils.readLines(labels).toArray(new String[0]);
+			HashSet<String> unique = new HashSet<>();
+			for (String label : labelValues) {
+				if (label.isEmpty() || label.charAt(0) < '0' || label.charAt(0) > '3' || !unique.add(label)) {
+					throw new IOException("Invalid or duplicate model label: " + label);
+				}
+			}
+			DataInputStream input = new DataInputStream(new BufferedInputStream(weights));
+			labelSize = IOUtils.readLittleEndianInt(input);
+			featureSize = IOUtils.readLittleEndianInt(input);
+			if (labelSize <= 0 || labelSize != labelValues.length || featureSize < 0) {
+				throw new IOException("Invalid model dimensions or label count");
+			}
+			int transitionCount = IOUtils.checkedArrayLength(labelSize, labelSize);
+			int featureCount = IOUtils.checkedArrayLength(featureSize, labelSize);
+			llWeights = IOUtils.readLittleEndianInts(input, transitionCount);
+			flWeights = IOUtils.readLittleEndianInts(input, featureCount);
+			if (input.read() != -1) throw new IOException("Unexpected trailing model weights");
+			featureDat = readFeatureDat(features);
 		}
-		featureDat = new DoubleArrayTrie(baseArr, checkArr);
-
-		List<String> labelList = IOUtils.readLines(labelInput);
-		labelValues = new String[labelList.size()];
-		labelList.toArray(labelValues);
 
 		// 记录label 集合，能与allowTabular 映射起来
 		List<List<Integer>> posTags = getPosTags();
@@ -140,6 +139,54 @@ public final class StructuredPerceptronModel implements Serializable {
 					.mapToInt(x -> x)
 					.toArray();
 		}
+		for (int[] allowed : allowTabular) {
+			if (allowed == null || allowed.length == 0) {
+				throw new IOException("Model labels do not cover all required character positions");
+			}
+		}
+	}
+
+	/** Decode interleaved DAT pairs directly; no full-file byte or interleaved int copy. */
+	private static DoubleArrayTrie readFeatureDat(InputStream stream) throws IOException {
+		DataInputStream input = new DataInputStream(new BufferedInputStream(stream));
+		int capacity = 4096;
+		if (stream instanceof FileInputStream) {
+			java.nio.channels.FileChannel channel = ((FileInputStream) stream).getChannel();
+			long remaining = channel.size() - channel.position();
+			if (remaining % 8 != 0 || remaining / 8 > Integer.MAX_VALUE - 8) {
+				throw new IOException("Invalid feature DAT byte length: " + remaining);
+			}
+			capacity = (int) Math.max(1, remaining / 8);
+		}
+		int[] base = new int[capacity];
+		int[] check = new int[capacity];
+		int size = 0;
+		byte[] buffer = new byte[32768];
+		IntBuffer integers = ByteBuffer.wrap(buffer).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer();
+		while (true) {
+			int bytes = 0;
+			int count;
+			while (bytes < buffer.length && (count = input.read(buffer, bytes, buffer.length - bytes)) != -1) {
+				bytes += count;
+			}
+			if (bytes == 0) break;
+			if (bytes % 8 != 0) throw new IOException("Truncated feature DAT pair");
+			long required = (long) size + bytes / 8;
+			if (required > Integer.MAX_VALUE - 8) throw new IOException("Feature DAT is too large");
+			if (required > base.length) {
+				capacity = (int) Math.min(Integer.MAX_VALUE - 8L, Math.max(required, (long) base.length * 2));
+				base = Arrays.copyOf(base, capacity);
+				check = Arrays.copyOf(check, capacity);
+			}
+			integers.position(0);
+			for (int i = 0; i < bytes / 8; i++) {
+				base[size] = integers.get();
+				check[size++] = integers.get();
+			}
+		}
+
+		if (size == 0) throw new IOException("Empty feature DAT");
+		return size == base.length ? new DoubleArrayTrie(base, check) : new DoubleArrayTrie(base, check, size);
 	}
 
 	/**
@@ -291,6 +338,9 @@ public final class StructuredPerceptronModel implements Serializable {
 	 * @param labelIndices 允许POS 索引值
 	 */
 	private void addWeights(int[] weights, int base, int[] labelIndices) {
+		if (base < 0 || base >= featureSize) {
+			throw new IllegalStateException("Feature DAT index outside model weights: " + base);
+		}
 		int offset = base * labelSize;
 		for (int i : labelIndices) {
 			weights[i] += flWeights[offset + i];
@@ -316,6 +366,15 @@ public final class StructuredPerceptronModel implements Serializable {
 			char right2,
 			int[] labelIndices) {
 		int[] weights = new int[labelSize];
+		evaluateCharWeights(left2, left1, mid, right1, right2, labelIndices, weights);
+		return weights;
+	}
+
+	/** Fills a caller-owned buffer; safe for concurrent calls using distinct buffers. */
+	public void evaluateCharWeights(char left2, char left1, char mid, char right1, char right2,
+	                                int[] labelIndices, int[] weights) {
+		if (weights.length != labelSize) throw new IllegalArgumentException("Invalid weights buffer size");
+		Arrays.fill(weights, 0);
 		int base;
 		if ((base = findUnigramFeat(mid, UNIGRAM_FEATURE_1)) != MATCH_FAILURE_INDEX) {
 			addWeights(weights, base, labelIndices);
@@ -338,6 +397,5 @@ public final class StructuredPerceptronModel implements Serializable {
 		if ((base = findBigramFeat(right1, right2, BIGRAM_FEATURE_4)) != MATCH_FAILURE_INDEX) {
 			addWeights(weights, base, labelIndices);
 		}
-		return weights;
 	}
 }

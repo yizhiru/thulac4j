@@ -1,9 +1,12 @@
 package io.github.yizhiru.thulac4j.perceptron;
 
+import io.github.yizhiru.thulac4j.ModelIntegrationTest;
 import io.github.yizhiru.thulac4j.process.RuleAnnotator;
-import io.github.yizhiru.thulac4j.term.POC;
 import io.github.yizhiru.thulac4j.term.AnnotatedTerms;
+import io.github.yizhiru.thulac4j.term.POC;
+
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -13,6 +16,7 @@ import static io.github.yizhiru.thulac4j.SPChineseTokenizerTest.*;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+@Category(ModelIntegrationTest.class)
 public class StructuredPerceptronModelTest {
 
 	@Test

@@ -1,0 +1,96 @@
+{
+  "baseline_ref": "a9d5b8405e71ff900be08f36b876c225daec63c7",
+  "java": "/Library/Java/JavaVirtualMachines/jdk-19.jdk/Contents/Home/bin/java",
+  "java_version": "java version \"19.0.1\" 2022-10-18\nJava(TM) SE Runtime Environment (build 19.0.1+10-21)\nJava HotSpot(TM) 64-Bit Server VM (build 19.0.1+10-21, mixed mode, sharing)\n",
+  "platform": {
+    "system": "Darwin",
+    "release": "25.6.0",
+    "version": "Darwin Kernel Version 25.6.0: Fri Jul 31 19:18:43 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T8112",
+    "machine": "arm64"
+  },
+  "jvm_args": "-Xms2g -Xmx2g -XX:+UseG1GC",
+  "forks": 2,
+  "threads": 1,
+  "warmup_iterations": 3,
+  "measurement_iterations": 5,
+  "iteration_seconds": 1,
+  "model_manifest": {
+    "package": "thulac 0.2.2",
+    "source_page": "https://pypi.org/project/thulac/0.2.2/",
+    "download_url": "https://files.pythonhosted.org/packages/7c/d1/1529cba069658689b8d9fb90205e0a8d1ff41a507fb9c458e17aa8217cdf/thulac-0.2.2-py3-none-any.whl",
+    "archive_sha256": "642503118cb08afdd3ed0b0e5d0a8d1305185b7b2fd7fececee27b204a586320",
+    "files": {
+      "cws_model.bin": {
+        "size": 39262152,
+        "sha256": "ac3a67bce956cccb6993fc4febf92c1646d334c2dc25b884066ae564980feeea"
+      },
+      "cws_dat.bin": {
+        "size": 61144568,
+        "sha256": "0f938211774c6e4c9b8642f8fc1e48fd758277f3cba8109a070c8755b1774f06"
+      },
+      "model_c_model.bin": {
+        "size": 369241352,
+        "sha256": "b795ffd004cc75f4bb27a5cc132f77c1608300c6283e12fac90fd518ae8932c2"
+      },
+      "model_c_dat.bin": {
+        "size": 23752648,
+        "sha256": "8bd4d8be35e6c136c775157ed542244a0bdad0813ebc457774c074ca4eb6b90d"
+      },
+      "cws_label.txt": {
+        "size": 8,
+        "sha256": "ecaaf36c81348fd5b67561714e68f1912160fe711fba809817c7fa7cab3c5f17"
+      },
+      "model_c_label.txt": {
+        "size": 306,
+        "sha256": "aad69b274f519de13c14854615a73e7b71335bde686f694179acc420df347b44"
+      }
+    }
+  },
+  "corpus_sha256": "366162c8d28230343a9ee559bb9238fb0d8a5fdc7b4e92e16695b17a47729787",
+  "started_at": "2026-10-15T09:13:45+0800",
+  "run_order": [
+    "baseline-segment-corpus",
+    "optimized-segment-corpus",
+    "optimized-segment-short",
+    "baseline-segment-short",
+    "baseline-segment-mixed",
+    "optimized-segment-mixed",
+    "optimized-segment-long",
+    "baseline-segment-long",
+    "baseline-pos-corpus",
+    "optimized-pos-corpus",
+    "optimized-pos-short",
+    "baseline-pos-short",
+    "baseline-pos-mixed",
+    "optimized-pos-mixed",
+    "optimized-pos-long",
+    "baseline-pos-long"
+  ],
+  "optimized_source_sha256": {
+    "io/github/yizhiru/thulac4j/POSTagger.java": "038840fa69bb8da805c036c3b1ac0a92fb5a6d7f8717cfcfc68eab4bd0bc7564",
+    "io/github/yizhiru/thulac4j/SPChineseTokenizer.java": "2f343eb05c02e5c2bcb3a9e3555a4767df65ca5c314e3e81773d60fbacf586b4",
+    "io/github/yizhiru/thulac4j/Segmenter.java": "fd5b091a3941eed3b0285a4e3d0acf9f8b3538d4d59f0290e33dd5c29623a755",
+    "io/github/yizhiru/thulac4j/TokenizerConfig.java": "df80b9fbc847549ceb33239a5df765b4bc0294d3e721aadcd6dc9b4c6d13c71a",
+    "io/github/yizhiru/thulac4j/common/DoubleArrayTrie.java": "c3831adebf606ac45e8e2697ae4b09728c8392f0bc17123c8b13b4b121258c63",
+    "io/github/yizhiru/thulac4j/common/Nullable.java": "a9fd47612352b1eaebd9c9c3b4520800bdb94de777460abc92085154e8dafbb2",
+    "io/github/yizhiru/thulac4j/perceptron/StructuredPerceptronClassifier.java": "3881f4d88d8028877773932bb5d2deec4dd593992ea558e3d16f42c93db90fcc",
+    "io/github/yizhiru/thulac4j/perceptron/StructuredPerceptronModel.java": "1ffe9aaa75864acbc56a45927cd4db983fe4e72a8bd0ce94c6cbe70113ba8d66",
+    "io/github/yizhiru/thulac4j/process/LexiconCementer.java": "48b920170b2cbf2d9d1c28298bcd8ef30f6073354d2e4632afa950a737e7f376",
+    "io/github/yizhiru/thulac4j/process/RuleAnnotator.java": "da96de6df42e9de06b8f14efb926e63170baad826a3830570c15f3f70b99636c",
+    "io/github/yizhiru/thulac4j/process/SpecifiedWordCementer.java": "00fc1fe110a7bfd57d8fe79cfe70a4e0ea77ccabc145d4e7673c78c2937699a1",
+    "io/github/yizhiru/thulac4j/term/AnnotatedTerms.java": "02170944c227d2c20ece9fb2f69925c629c9df129fe13f0b0d12e562acf5ec02",
+    "io/github/yizhiru/thulac4j/term/CharType.java": "4680e6a0a108c05fb820440d271196e668a0f9666eb5c0d964b4410db086d0aa",
+    "io/github/yizhiru/thulac4j/term/POC.java": "4457abe024a96938bc2d74773e95a69609ec2fa31c16981cdc7ec47bea1f1e29",
+    "io/github/yizhiru/thulac4j/term/TokenItem.java": "8eb95b7861ade2601b1c21be235811c890039f4e8cb6c974f3f3cd85b8ad9fc6",
+    "io/github/yizhiru/thulac4j/util/CharUtils.java": "480ffa5aa3ed3299e482ed046fbf4c539771b9c5d1a8048e7d40a8ae727eaf7a",
+    "io/github/yizhiru/thulac4j/util/ChineseUtils.java": "6a98a3fff8fc74e01fd7f5545d48a19a27c67d0c27d20ac7b3a0593a9477a7c0",
+    "io/github/yizhiru/thulac4j/util/IOUtils.java": "31426566c29c5b5e32ba8183926c4f08d8ffee870c2b04eff83d6d43c4e08962",
+    "io/github/yizhiru/thulac4j/util/ModelPaths.java": "58e6567c041f45a4e5a7353f7828f4ff41108b0984c00e337fb72a0afb7bdb10"
+  },
+  "finished_at": "2026-10-15T09:20:59+0800",
+  "hardware": {
+    "cpu": "Apple M2",
+    "model": "Mac14,2",
+    "memory_bytes": 17179869184
+  }
+}

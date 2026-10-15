@@ -1,0 +1,14 @@
+[INFO] Scanning for projects...
+[INFO] Inspecting build with total of 1 modules
+[INFO] Installing Central Publishing features
+[INFO] 
+[INFO] ---------------------< io.github.yizhiru:thulac4j >---------------------
+[INFO] Building thulac4j 4.0.0
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  47.379 s
+[INFO] Finished at: 2026-10-15T09:43:58+08:00
+[INFO] ------------------------------------------------------------------------
